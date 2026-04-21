@@ -217,41 +217,52 @@
       margin-bottom: 0.9rem;
     }
 
-    .bookmarklet-box {
-      text-align: center;
-      padding: clamp(1rem, 2vh, 1.5rem);
-      background: rgba(217, 119, 87, 0.06);
-      border: 1px dashed rgba(217, 119, 87, 0.35);
+    .snippet-box {
+      position: relative;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.08);
       border-radius: 12px;
-      margin-bottom: 1rem;
+      padding: 0.9rem 3.2rem 0.9rem 1rem;
+      font-family: 'SF Mono', ui-monospace, Menlo, Consolas, monospace;
+      font-size: clamp(0.72rem, 0.9vw, 0.8rem);
+      color: rgba(255, 255, 255, 0.75);
+      line-height: 1.5;
+      overflow-x: auto;
+      white-space: pre;
+      margin-bottom: 0.8rem;
+    }
+    .snippet-box::-webkit-scrollbar { height: 6px; }
+    .snippet-box::-webkit-scrollbar-thumb {
+      background: rgba(255,255,255,0.2);
+      border-radius: 3px;
     }
 
-    a.bookmarklet {
-      display: inline-block;
-      padding: 0.7rem 1.3rem;
-      background: linear-gradient(135deg, rgba(217, 119, 87, 0.55), rgba(245, 184, 143, 0.4));
-      border: 1px solid rgba(217, 119, 87, 0.6);
-      border-radius: 10px;
-      color: #fff;
-      text-decoration: none;
+    .copy-btn {
+      position: absolute;
+      top: 8px; right: 8px;
+      padding: 0.35rem 0.7rem;
+      background: rgba(217, 119, 87, 0.2);
+      border: 1px solid rgba(217, 119, 87, 0.4);
+      color: #f5c7a8;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 0.75rem;
       font-weight: 600;
-      font-size: clamp(0.88rem, 1.1vw, 1rem);
-      letter-spacing: 0.3px;
-      cursor: grab;
-      user-select: none;
-      box-shadow: 0 4px 18px rgba(217, 119, 87, 0.25);
-      transition: transform 0.2s, box-shadow 0.2s;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.15s;
     }
-    a.bookmarklet:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 6px 24px rgba(217, 119, 87, 0.35);
-    }
-    a.bookmarklet:active { cursor: grabbing; }
+    .copy-btn:hover { background: rgba(217, 119, 87, 0.35); }
+    .copy-btn.copied { background: rgba(74, 222, 128, 0.25); border-color: rgba(74, 222, 128, 0.5); color: #86efac; }
 
-    .bookmarklet-hint {
+    .warn-note {
       margin-top: 0.7rem;
+      padding: 0.6rem 0.8rem;
+      background: rgba(251, 191, 36, 0.08);
+      border: 1px solid rgba(251, 191, 36, 0.25);
+      border-radius: 8px;
       font-size: clamp(0.72rem, 0.92vw, 0.82rem);
-      color: rgba(255,255,255,0.45);
+      color: rgba(252, 211, 77, 0.9);
+      line-height: 1.55;
     }
 
     .steps {
@@ -398,24 +409,25 @@
     </section>
 
     <section class="card">
-      <div class="install-title">Install the bookmarklet</div>
-
-      <div class="bookmarklet-box">
-        <a class="bookmarklet" id="bookmarkletLink" href="javascript:void(0)" draggable="true">⚡ Claude Usage</a>
-        <div class="bookmarklet-hint">Drag this button to your bookmarks bar ↑</div>
-      </div>
+      <div class="install-title">Get your usage</div>
 
       <ol class="steps">
-        <li>Drag the button above into your browser's bookmarks bar.</li>
-        <li>Open <code>claude.ai</code> in another tab (you must be logged in).</li>
-        <li>Click the <strong>⚡ Claude Usage</strong> bookmark. A tab will open here with your live quota.</li>
+        <li>Open <code>claude.ai</code> (logged in) and press <code>F12</code> (or <code>Cmd⌥I</code> on Mac) to open DevTools. Switch to the <strong>Console</strong> tab.</li>
+        <li>Copy the snippet below and paste it into the console, then press <code>Enter</code>.</li>
+        <li>A tab opens/refocuses here with your live quota.</li>
       </ol>
+      <div class="snippet-box">
+<code id="snippetCode">loading…</code>
+<button class="copy-btn" id="copyBtn">Copy</button>
+      </div>
+      <div class="warn-note">
+        First time? Chrome warns "Don't paste code you don't understand." That's expected — read the snippet first (it's short) or expand "What does it do?" below.
+      </div>
 
       <details>
         <summary>What does it do? Is it safe?</summary>
         <div>
-          The bookmarklet runs only when <em>you</em> click it, and only on the tab you clicked it in. On claude.ai, it reads your <code>lastActiveOrg</code> cookie value (an ID, not a secret) and calls
-          <code>claude.ai/api/organizations/&lt;org&gt;/usage</code> using your existing login — exactly the same request claude.ai makes to render its own sidebar widget. The JSON response is base64-encoded into the URL hash of this page. Nothing is sent to any third-party server. Your Claude session cookie never leaves claude.ai.
+          The snippet reads your <code>lastActiveOrg</code> cookie value (an ID, not a secret) and calls <code>claude.ai/api/organizations/&lt;org&gt;/usage</code> using your existing logged-in session — exactly the same request claude.ai makes to render its own sidebar widget. The JSON response is base64-encoded into the URL hash of this page. Nothing is sent to any third-party server. Your Claude session cookie never leaves claude.ai.
         </div>
       </details>
     </section>
@@ -427,17 +439,33 @@
     const STORAGE_KEY = 'claude-usage-web:v2';
     const $ = (id) => document.getElementById(id);
 
-    // ---------- bookmarklet generation ----------
-    // Injects the current site's origin so the bookmarklet knows where to send data.
-    function buildBookmarklet() {
+    // ---------- snippet generation ----------
+    // Builds the async JS that fetches usage data and opens our site with it.
+    function buildSnippetSource() {
       const site = location.origin + location.pathname.replace(/index\.html$/, '');
-      // Inline, minified-ish. Kept readable via function body then stringified.
-      const src = `(async()=>{try{if(location.hostname!=='claude.ai'){alert('[Claude Usage] claude.ai 탭에서 클릭하세요.\\n\\n현재 페이지: '+location.href);return;}let o;try{o=document.cookie.split('; ').find(r=>r.startsWith('lastActiveOrg='));}catch(e){alert('[Claude Usage] 이 페이지에서는 쿠키를 읽을 수 없습니다.\\nclaude.ai 메인 탭에서 클릭하세요.');return;}if(!o){alert('[Claude Usage] lastActiveOrg 쿠키를 찾지 못했습니다.\\nclaude.ai에 로그인 후 다시 시도하세요.');return;}const org=o.split('=')[1];const r=await fetch('/api/organizations/'+org+'/usage',{credentials:'include',headers:{'accept':'application/json'}});if(!r.ok){alert('[Claude Usage] API error '+r.status);return;}const d=await r.json();const p={v:1,ts:Date.now(),data:d};const j=JSON.stringify(p);const b=btoa(String.fromCharCode.apply(null,new TextEncoder().encode(j))).replace(/\\+/g,'-').replace(/\\//g,'_').replace(/=+$/,'');window.open(${JSON.stringify(site)}+'#d='+b,'claude-usage-web');}catch(e){alert('[Claude Usage] '+e.message);}})();`;
-      return 'javascript:' + encodeURI(src);
+      return `(async()=>{try{if(location.hostname!=='claude.ai'){alert('[Claude Usage] claude.ai 탭에서 실행하세요.\\n현재: '+location.href);return;}let o;try{o=document.cookie.split('; ').find(r=>r.startsWith('lastActiveOrg='));}catch(e){alert('[Claude Usage] 쿠키 접근 불가.\\nclaude.ai 메인 탭에서 실행하세요.');return;}if(!o){alert('[Claude Usage] lastActiveOrg 쿠키를 찾지 못했습니다. 로그인 후 다시 시도하세요.');return;}const org=o.split('=')[1];const r=await fetch('/api/organizations/'+org+'/usage',{credentials:'include',headers:{'accept':'application/json'}});if(!r.ok){alert('[Claude Usage] API error '+r.status);return;}const d=await r.json();const p={v:1,ts:Date.now(),data:d};const j=JSON.stringify(p);const b=btoa(String.fromCharCode.apply(null,new TextEncoder().encode(j))).replace(/\\+/g,'-').replace(/\\//g,'_').replace(/=+$/,'');window.open(${JSON.stringify(site)}+'#d='+b,'claude-usage-web');}catch(e){alert('[Claude Usage] '+e.message);}})();`;
     }
 
-    function installBookmarklet() {
-      $('bookmarkletLink').href = buildBookmarklet();
+    function installSnippets() {
+      $('snippetCode').textContent = buildSnippetSource();
+    }
+
+    function wireCopyButton() {
+      const btn = $('copyBtn');
+      btn.addEventListener('click', async () => {
+        const text = $('snippetCode').textContent;
+        try {
+          await navigator.clipboard.writeText(text);
+          btn.textContent = 'Copied!';
+          btn.classList.add('copied');
+          setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 1600);
+        } catch {
+          const r = document.createRange();
+          r.selectNodeContents($('snippetCode'));
+          const s = getSelection(); s.removeAllRanges(); s.addRange(r);
+          btn.textContent = 'Select+Cmd/Ctrl+C';
+        }
+      });
     }
 
     // ---------- payload decoding ----------
@@ -601,11 +629,6 @@
       if (payload) adoptPayload(payload, 'hash');
     });
 
-    $('bookmarkletLink').addEventListener('click', (e) => {
-      e.preventDefault();
-      alert('Drag this button to your bookmarks bar (don\'t click it here).\n\nThen open claude.ai and click the bookmark.');
-    });
-
     // ---------- particles ----------
     (function createParticles() {
       const container = $('particles');
@@ -623,7 +646,8 @@
     })();
 
     // ---------- init ----------
-    installBookmarklet();
+    installSnippets();
+    wireCopyButton();
     const fromHash = readHashPayload();
     if (fromHash) {
       adoptPayload(fromHash, 'hash');

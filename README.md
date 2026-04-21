@@ -16,22 +16,25 @@ GET https://claude.ai/api/organizations/<org_id>/usage
 
 It returns the same data that powers the sidebar widget. Only a logged-in browser tab on `claude.ai` can call it (same-origin + session cookie). A plain website hosted elsewhere **cannot** reach it due to CORS.
 
-So this project uses a **bookmarklet bridge**:
+So this project uses a **one-shot snippet bridge** you run on claude.ai yourself:
 
-1. You install a one-line bookmarklet from this page into your bookmarks bar.
-2. You open `claude.ai` (already logged in).
-3. You click the bookmark. The bookmarklet runs on the claude.ai tab, fetches the usage JSON, and opens this page with the data base64-encoded in the URL hash.
-4. This page decodes the hash, renders the widget, and caches the snapshot in `localStorage` so you can see the last known values even without refetching.
+1. You open claude.ai (already logged in) and press F12 to open DevTools.
+2. You paste a short snippet (copied from this page) into the Console and press Enter.
+3. The snippet fetches the usage JSON with your existing session cookie, then opens this page with the data base64-encoded in the URL hash.
+4. This page decodes the hash, renders the widget, and caches the snapshot in `localStorage` so you see the last known values even without re-running.
 
 No backend. No extension. No API key. Your claude.ai session cookie never leaves `claude.ai`.
 
+> **Why not a bookmarklet?** claude.ai sets a strict Content Security Policy that blocks `javascript:` bookmarks — clicking one redirects to `about:blank#blocked`. The Console-paste method sidesteps CSP because DevTools is privileged.
+
 ## Use
 
-1. Open `index.html` (locally or hosted — GitHub Pages, Netlify, etc.).
-2. Drag the **⚡ Claude Usage** button into your browser's bookmarks bar.
-3. Open [claude.ai](https://claude.ai) in another tab, logged in.
-4. Click the bookmark. A tab will open/refocus here with your current quota.
-5. Click **Refresh on claude.ai →** (or just click the bookmark again) whenever you want a new snapshot.
+1. Open the hosted page (or `index.html` locally).
+2. Copy the snippet with the **Copy** button.
+3. Open [claude.ai](https://claude.ai) in another tab, logged in. Press <kbd>F12</kbd> (or <kbd>Cmd</kbd>+<kbd>⌥</kbd>+<kbd>I</kbd> on Mac) → **Console** tab.
+4. Paste the snippet, press <kbd>Enter</kbd>. Chrome may warn about pasting — type the requested confirmation or use the "allow pasting" button.
+5. A tab opens/refocuses on this page with your current quota.
+6. Re-run the snippet (↑ arrow in the console) whenever you want a fresh snapshot.
 
 ## What gets displayed
 
