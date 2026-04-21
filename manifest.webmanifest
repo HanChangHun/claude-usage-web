@@ -9,10 +9,10 @@
   "background_color": "#1F1E1C",
   "theme_color": "#1F1E1C",
   "icons": [
-    { "src": "favicon-192.png", "type": "image/png", "sizes": "192x192", "purpose": "any" },
-    { "src": "favicon-512.png", "type": "image/png", "sizes": "512x512", "purpose": "any" },
-    { "src": "favicon-192.png", "type": "image/png", "sizes": "192x192", "purpose": "maskable" },
-    { "src": "favicon-512.png", "type": "image/png", "sizes": "512x512", "purpose": "maskable" },
-    { "src": "favicon.svg", "type": "image/svg+xml", "sizes": "any", "purpose": "any" }
+    { "src": "assets/favicon-192.png", "type": "image/png", "sizes": "192x192", "purpose": "any" },
+    { "src": "assets/favicon-512.png", "type": "image/png", "sizes": "512x512", "purpose": "any" },
+    { "src": "assets/favicon-192.png", "type": "image/png", "sizes": "192x192", "purpose": "maskable" },
+    { "src": "assets/favicon-512.png", "type": "image/png", "sizes": "512x512", "purpose": "maskable" },
+    { "src": "assets/favicon.svg", "type": "image/svg+xml", "sizes": "any", "purpose": "any" }
   ]
 }

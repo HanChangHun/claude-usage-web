@@ -71,7 +71,12 @@ The **mini window** toggle next to the *Open claude.ai* button asks the browser 
 ## Files
 
 - `index.html` — the whole app (styles, script, snippet generator)
-- `favicon.svg` — the quota-mirror mark
+- `manifest.webmanifest` — PWA metadata (name, theme, icon references)
+- `assets/` — static images
+  - `favicon.svg` — the quota-mirror mark (source of truth; used by modern browser tabs)
+  - `favicon-{16,32,48,192,512}.png` — rasterized sizes for Windows/Chrome surfaces
+  - `favicon.ico` — multi-resolution ICO (16/32/48) for legacy and Windows shortcuts
+  - `apple-touch-icon.png` — 180×180 for iOS home-screen
 - `LICENSE` — MIT
 
 ## License
