@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#302b63"/>
+      <stop offset="1" stop-color="#0f0c29"/>
+    </linearGradient>
+    <linearGradient id="warm" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0" stop-color="#d97757"/>
+      <stop offset="1" stop-color="#f5b88f"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="14" fill="url(#bg)"/>
+  <!-- baseline -->
+  <line x1="12" y1="50" x2="52" y2="50" stroke="rgba(255,255,255,0.22)" stroke-width="1.2" stroke-linecap="round"/>
+  <!-- bars -->
+  <rect x="14" y="38" width="7" height="12" rx="1.8" fill="url(#warm)" opacity="0.55"/>
+  <rect x="24" y="28" width="7" height="22" rx="1.8" fill="url(#warm)" opacity="0.78"/>
+  <rect x="34" y="34" width="7" height="16" rx="1.8" fill="url(#warm)" opacity="0.68"/>
+  <rect x="44" y="20" width="7" height="30" rx="1.8" fill="url(#warm)"/>
+  <!-- spark -->
+  <polyline points="17.5,34 27.5,24 37.5,30 47.5,16" fill="none" stroke="#ffffff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" opacity="0.85"/>
+  <circle cx="47.5" cy="16" r="2.1" fill="#ffffff"/>
+</svg>

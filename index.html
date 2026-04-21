@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#1a1545">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Claude Usage</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body {
+      margin: 0; padding: 0;
+      min-height: 100%;
+      overscroll-behavior: none;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    body {
+      min-height: 100vh;
+      background: #1a1545;
+      color: #fff;
+      font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+      padding: clamp(1.2rem, 3vh, 2.6rem) clamp(1rem, 3vw, 2rem) clamp(3rem, 6vh, 4rem);
+    }
+
+    .bg {
+      position: fixed;
+      top: -50px; left: -50px; right: -50px; bottom: -50px;
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+      z-index: -2;
+    }
+
+    .particles {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      pointer-events: none;
+      z-index: -1;
+    }
+    .particle {
+      position: absolute;
+      width: 3px; height: 3px;
+      background: rgba(255, 255, 255, 0.18);
+      border-radius: 50%;
+      animation: float linear infinite;
+    }
+    @keyframes float {
+      0%   { transform: translateY(100vh) scale(0); opacity: 0; }
+      10%  { opacity: 1; }
+      90%  { opacity: 1; }
+      100% { transform: translateY(-10vh) scale(1); opacity: 0; }
+    }
+
+    .container {
+      max-width: min(94vw, 640px);
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: clamp(0.9rem, 2vh, 1.4rem);
+    }
+
+    header {
+      text-align: center;
+      padding-top: clamp(0.6rem, 2vh, 1.4rem);
+    }
+
+    .badge {
+      display: inline-block;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 20px;
+      padding: clamp(4px, 0.7vh, 8px) clamp(12px, 1.8vw, 20px);
+      font-size: clamp(0.65rem, 0.9vw, 0.78rem);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: clamp(0.7rem, 1.5vh, 1.2rem);
+      backdrop-filter: blur(10px);
+      color: rgba(230, 220, 255, 0.7);
+      transition: background 0.3s, border-color 0.3s, color 0.3s;
+    }
+    .badge[data-state="fresh"] {
+      background: rgba(217, 119, 87, 0.14);
+      border-color: rgba(217, 119, 87, 0.38);
+      color: #f5c7a8;
+    }
+    .badge[data-state="stale"] {
+      background: rgba(251, 191, 36, 0.1);
+      border-color: rgba(251, 191, 36, 0.3);
+      color: #fcd34d;
+    }
+
+    h1 {
+      font-size: clamp(2rem, 4vw, 3.2rem);
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      background: linear-gradient(to right, #d97757, #f5b88f, #fbbf24);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .sub {
+      margin-top: clamp(0.3rem, 0.7vh, 0.5rem);
+      font-size: clamp(0.78rem, 1vw, 0.9rem);
+      color: rgba(255, 255, 255, 0.45);
+      letter-spacing: 0.3px;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: clamp(12px, 1.2vw, 18px);
+      backdrop-filter: blur(20px);
+      padding: clamp(1.1rem, 2.4vh, 1.8rem) clamp(1.2rem, 2vw, 1.8rem);
+    }
+
+    .widget {
+      display: flex;
+      flex-direction: column;
+      gap: clamp(0.9rem, 2vh, 1.3rem);
+    }
+
+    .row {
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+    }
+
+    .row-head {
+      display: flex;
+      align-items: baseline;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+    }
+
+    .row .label {
+      font-size: clamp(0.82rem, 1.05vw, 0.95rem);
+      color: rgba(255, 255, 255, 0.72);
+      font-weight: 500;
+      flex-shrink: 0;
+    }
+
+    .row .pct {
+      font-size: clamp(0.82rem, 1.05vw, 0.95rem);
+      font-weight: 600;
+      color: #f5b88f;
+      font-variant-numeric: tabular-nums;
+    }
+    .row .pct.zero { color: rgba(255,255,255,0.35); }
+    .row .pct.warn { color: #fbbf24; }
+    .row .pct.crit { color: #f87171; }
+
+    .row .reset {
+      margin-left: auto;
+      font-size: clamp(0.72rem, 0.9vw, 0.82rem);
+      color: rgba(255, 255, 255, 0.42);
+      font-variant-numeric: tabular-nums;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+    .row .reset svg { width: 12px; height: 12px; opacity: 0.7; }
+
+    .bar {
+      height: 6px;
+      background: rgba(255, 255, 255, 0.06);
+      border-radius: 999px;
+      overflow: hidden;
+      position: relative;
+    }
+    .bar .fill {
+      height: 100%;
+      background: linear-gradient(to right, #d97757, #f5b88f);
+      border-radius: 999px;
+      transition: width 0.5s ease;
+      min-width: 0;
+    }
+    .bar .fill.warn { background: linear-gradient(to right, #f59e0b, #fbbf24); }
+    .bar .fill.crit { background: linear-gradient(to right, #dc2626, #f87171); }
+    .bar .fill.zero { background: rgba(255,255,255,0.12); }
+
+    .tier {
+      margin-top: 0.2rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: clamp(0.7rem, 0.9vw, 0.8rem);
+      color: rgba(255,255,255,0.4);
+    }
+    .tier strong {
+      color: rgba(245, 184, 143, 0.9);
+      font-weight: 600;
+    }
+
+    .empty {
+      text-align: center;
+      padding: clamp(1.2rem, 3vh, 2rem) 0.5rem;
+    }
+    .empty .big {
+      font-size: clamp(1rem, 1.3vw, 1.15rem);
+      color: rgba(255,255,255,0.7);
+      margin-bottom: 0.5rem;
+    }
+    .empty p {
+      font-size: clamp(0.78rem, 1vw, 0.88rem);
+      color: rgba(255,255,255,0.45);
+      line-height: 1.55;
+    }
+
+    .install-title {
+      font-size: clamp(0.72rem, 0.95vw, 0.85rem);
+      text-transform: uppercase;
+      letter-spacing: 2.2px;
+      color: rgba(255, 255, 255, 0.45);
+      margin-bottom: 0.9rem;
+    }
+
+    .bookmarklet-box {
+      text-align: center;
+      padding: clamp(1rem, 2vh, 1.5rem);
+      background: rgba(217, 119, 87, 0.06);
+      border: 1px dashed rgba(217, 119, 87, 0.35);
+      border-radius: 12px;
+      margin-bottom: 1rem;
+    }
+
+    a.bookmarklet {
+      display: inline-block;
+      padding: 0.7rem 1.3rem;
+      background: linear-gradient(135deg, rgba(217, 119, 87, 0.55), rgba(245, 184, 143, 0.4));
+      border: 1px solid rgba(217, 119, 87, 0.6);
+      border-radius: 10px;
+      color: #fff;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: clamp(0.88rem, 1.1vw, 1rem);
+      letter-spacing: 0.3px;
+      cursor: grab;
+      user-select: none;
+      box-shadow: 0 4px 18px rgba(217, 119, 87, 0.25);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    a.bookmarklet:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 24px rgba(217, 119, 87, 0.35);
+    }
+    a.bookmarklet:active { cursor: grabbing; }
+
+    .bookmarklet-hint {
+      margin-top: 0.7rem;
+      font-size: clamp(0.72rem, 0.92vw, 0.82rem);
+      color: rgba(255,255,255,0.45);
+    }
+
+    .steps {
+      list-style: none;
+      counter-reset: step;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.7rem;
+    }
+    .steps li {
+      counter-increment: step;
+      display: flex;
+      gap: 0.8rem;
+      align-items: flex-start;
+      font-size: clamp(0.82rem, 1.05vw, 0.93rem);
+      color: rgba(255,255,255,0.72);
+      line-height: 1.5;
+    }
+    .steps li::before {
+      content: counter(step);
+      flex-shrink: 0;
+      width: 24px; height: 24px;
+      background: rgba(217, 119, 87, 0.18);
+      border: 1px solid rgba(217, 119, 87, 0.35);
+      color: #f5c7a8;
+      border-radius: 50%;
+      font-size: 0.78rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 2px;
+    }
+    .steps code {
+      font-family: 'SF Mono', ui-monospace, Menlo, Consolas, monospace;
+      background: rgba(255,255,255,0.08);
+      padding: 0.05em 0.4em;
+      border-radius: 4px;
+      font-size: 0.92em;
+      color: rgba(255,255,255,0.85);
+    }
+
+    details {
+      margin-top: 0.9rem;
+      font-size: clamp(0.75rem, 0.95vw, 0.85rem);
+      color: rgba(255,255,255,0.5);
+    }
+    details summary {
+      cursor: pointer;
+      user-select: none;
+      padding: 0.3rem 0;
+      transition: color 0.2s;
+    }
+    details summary:hover { color: rgba(255,255,255,0.8); }
+    details > *:not(summary) {
+      margin-top: 0.5rem;
+      padding: 0.6rem 0.8rem;
+      background: rgba(0,0,0,0.2);
+      border-radius: 8px;
+      line-height: 1.6;
+    }
+
+    .refresh-row {
+      margin-top: 0.8rem;
+      display: flex;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .updated {
+      font-size: clamp(0.72rem, 0.9vw, 0.8rem);
+      color: rgba(255,255,255,0.4);
+    }
+    button.ghost {
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: rgba(255, 255, 255, 0.6);
+      border-radius: 10px;
+      height: 2.4rem;
+      padding: 0 1rem;
+      font-size: clamp(0.75rem, 0.95vw, 0.85rem);
+      font-family: inherit;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s, color 0.2s;
+    }
+    button.ghost:hover {
+      background-color: rgba(255, 255, 255, 0.06);
+      border-color: rgba(255, 255, 255, 0.3);
+      color: rgba(255, 255, 255, 0.9);
+    }
+
+    .credit {
+      margin-top: clamp(1.2rem, 3vh, 2rem);
+      text-align: center;
+      font-size: clamp(0.65rem, 0.8vw, 0.75rem);
+      color: rgba(255, 255, 255, 0.22);
+      letter-spacing: 0.5px;
+    }
+    .credit a {
+      color: inherit;
+      text-decoration: none;
+      border-bottom: 1px dashed rgba(255, 255, 255, 0.2);
+      transition: color 0.25s, border-color 0.25s;
+    }
+    .credit a:hover {
+      color: rgba(255, 255, 255, 0.6);
+      border-color: rgba(255, 255, 255, 0.5);
+    }
+
+    .hidden { display: none !important; }
+
+    @media (max-width: 480px) {
+      .row-head { gap: 0.4rem; }
+      .row .reset { margin-left: auto; }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg"></div>
+  <div class="particles" id="particles"></div>
+
+  <div class="container">
+    <header>
+      <div class="badge" id="badge">NO DATA</div>
+      <h1>Claude Usage</h1>
+      <p class="sub">Your live Claude.ai quota — session (5h), weekly, and per-model.</p>
+    </header>
+
+    <section class="card">
+      <div class="widget" id="widget">
+        <div class="empty" id="emptyState">
+          <div class="big">No usage data yet.</div>
+          <p>Install the bookmarklet below and click it while on <code style="font-family:'SF Mono',monospace;background:rgba(255,255,255,0.06);padding:0.05em 0.4em;border-radius:4px;font-size:0.92em;">claude.ai</code>.</p>
+        </div>
+      </div>
+      <div class="refresh-row hidden" id="refreshRow">
+        <span class="updated" id="updatedAt">Updated just now</span>
+        <button class="ghost" id="openClaudeBtn">Refresh on claude.ai →</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="install-title">Install the bookmarklet</div>
+
+      <div class="bookmarklet-box">
+        <a class="bookmarklet" id="bookmarkletLink" href="javascript:void(0)" draggable="true">⚡ Claude Usage</a>
+        <div class="bookmarklet-hint">Drag this button to your bookmarks bar ↑</div>
+      </div>
+
+      <ol class="steps">
+        <li>Drag the button above into your browser's bookmarks bar.</li>
+        <li>Open <code>claude.ai</code> in another tab (you must be logged in).</li>
+        <li>Click the <strong>⚡ Claude Usage</strong> bookmark. A tab will open here with your live quota.</li>
+      </ol>
+
+      <details>
+        <summary>What does it do? Is it safe?</summary>
+        <div>
+          The bookmarklet runs only when <em>you</em> click it, and only on the tab you clicked it in. On claude.ai, it reads your <code>lastActiveOrg</code> cookie value (an ID, not a secret) and calls
+          <code>claude.ai/api/organizations/&lt;org&gt;/usage</code> using your existing login — exactly the same request claude.ai makes to render its own sidebar widget. The JSON response is base64-encoded into the URL hash of this page. Nothing is sent to any third-party server. Your Claude session cookie never leaves claude.ai.
+        </div>
+      </details>
+    </section>
+  </div>
+
+  <p class="credit">by <a href="https://github.com/HanChangHun" target="_blank" rel="noopener">HanChangHun</a></p>
+
+  <script>
+    const STORAGE_KEY = 'claude-usage-web:v2';
+    const $ = (id) => document.getElementById(id);
+
+    // ---------- bookmarklet generation ----------
+    // Injects the current site's origin so the bookmarklet knows where to send data.
+    function buildBookmarklet() {
+      const site = location.origin + location.pathname.replace(/index\.html$/, '');
+      // Inline, minified-ish. Kept readable via function body then stringified.
+      const src = `(async()=>{try{const o=document.cookie.split('; ').find(r=>r.startsWith('lastActiveOrg='));if(!o){alert('[Claude Usage] claude.ai\\n로그인된 탭에서 실행하세요.');return;}const org=o.split('=')[1];const r=await fetch('/api/organizations/'+org+'/usage',{credentials:'include',headers:{'accept':'application/json'}});if(!r.ok){alert('[Claude Usage] API error '+r.status);return;}const d=await r.json();const p={v:1,ts:Date.now(),data:d};const j=JSON.stringify(p);const b=btoa(String.fromCharCode.apply(null,new TextEncoder().encode(j))).replace(/\\+/g,'-').replace(/\\//g,'_').replace(/=+$/,'');window.open(${JSON.stringify(site)}+'#d='+b,'claude-usage-web');}catch(e){alert('[Claude Usage] '+e.message);}})();`;
+      return 'javascript:' + encodeURI(src);
+    }
+
+    function installBookmarklet() {
+      $('bookmarkletLink').href = buildBookmarklet();
+    }
+
+    // ---------- payload decoding ----------
+    function b64urlDecode(s) {
+      s = s.replace(/-/g, '+').replace(/_/g, '/');
+      while (s.length % 4) s += '=';
+      const bin = atob(s);
+      const bytes = new Uint8Array(bin.length);
+      for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+      return new TextDecoder().decode(bytes);
+    }
+
+    function readHashPayload() {
+      const m = location.hash.match(/[#&]d=([A-Za-z0-9_\-]+)/);
+      if (!m) return null;
+      try {
+        const json = b64urlDecode(m[1]);
+        const payload = JSON.parse(json);
+        if (payload && payload.data && typeof payload.data === 'object') return payload;
+      } catch (e) { console.warn('hash decode failed', e); }
+      return null;
+    }
+
+    function loadStored() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return null;
+        const p = JSON.parse(raw);
+        if (p && p.data) return p;
+      } catch {}
+      return null;
+    }
+
+    function saveStored(payload) {
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(payload)); } catch {}
+    }
+
+    // ---------- formatting ----------
+    function fmtUntil(ms) {
+      const diff = ms - Date.now();
+      if (!Number.isFinite(diff) || diff <= 0) return 'expired';
+      const totalMin = Math.floor(diff / 60000);
+      const d = Math.floor(totalMin / 1440);
+      const h = Math.floor((totalMin % 1440) / 60);
+      const m = totalMin % 60;
+      if (d > 0) return `${d}d ${h}h`;
+      if (h > 0) return `${h}h ${m}m`;
+      return `${m}m`;
+    }
+
+    function fmtUpdated(ts) {
+      const diff = Date.now() - ts;
+      if (diff < 45_000) return 'Updated just now';
+      const totalMin = Math.floor(diff / 60_000);
+      if (totalMin < 60) return `Updated ${totalMin}m ago`;
+      const h = Math.floor(totalMin / 60);
+      if (h < 24) return `Updated ${h}h ago`;
+      const d = Math.floor(h / 24);
+      return `Updated ${d}d ago`;
+    }
+
+    function isStale(ts) {
+      return Date.now() - ts > 10 * 60_000;
+    }
+
+    function pctClass(p) {
+      if (p === 0) return 'zero';
+      if (p >= 90) return 'crit';
+      if (p >= 70) return 'warn';
+      return '';
+    }
+
+    // ---------- rendering ----------
+    const LIMIT_DEFS = [
+      { key: 'five_hour',       label: 'Session (5h)' },
+      { key: 'seven_day',       label: 'Weekly' },
+      { key: 'seven_day_opus',  label: 'Opus Weekly' },
+      { key: 'seven_day_sonnet', label: 'Sonnet Weekly' },
+    ];
+
+    function clockIcon() {
+      return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`;
+    }
+
+    function renderRow(label, limit) {
+      const pct = Math.max(0, Math.min(100, Number(limit.utilization) || 0));
+      const resetAt = limit.resets_at ? new Date(limit.resets_at).getTime() : null;
+      const pCls = pctClass(pct);
+      return `
+        <div class="row">
+          <div class="row-head">
+            <span class="label">${label}</span>
+            <span class="pct ${pCls}">${Math.round(pct)}%</span>
+            ${resetAt ? `<span class="reset" title="${new Date(resetAt).toLocaleString()}">${clockIcon()}<span data-reset="${resetAt}">${fmtUntil(resetAt)}</span></span>` : ''}
+          </div>
+          <div class="bar"><div class="fill ${pCls}" style="width:${pct}%"></div></div>
+        </div>`;
+    }
+
+    function renderWidget(payload) {
+      const { data, ts } = payload;
+      const widget = $('widget');
+      const rows = [];
+      for (const def of LIMIT_DEFS) {
+        const v = data[def.key];
+        if (v && typeof v.utilization === 'number') rows.push(renderRow(def.label, v));
+      }
+      let extra = '';
+      if (data.extra_usage?.is_enabled) {
+        const used = Number(data.extra_usage.used_credits) || 0;
+        const lim = Number(data.extra_usage.monthly_limit) || 0;
+        const usedStr = '$' + (used / 100).toFixed(2);
+        const limStr = '$' + (lim / 100).toFixed(2);
+        extra = `<div class="tier">Extra usage: <strong>${usedStr}</strong> of ${limStr}</div>`;
+      }
+      if (rows.length === 0) {
+        widget.innerHTML = `<div class="empty"><div class="big">No limits reported.</div><p>The response didn't contain any quota fields. Try again, or verify you're logged into claude.ai.</p></div>`;
+      } else {
+        widget.innerHTML = rows.join('') + extra;
+      }
+      $('refreshRow').classList.remove('hidden');
+      $('updatedAt').textContent = fmtUpdated(ts);
+      $('badge').dataset.state = isStale(ts) ? 'stale' : 'fresh';
+      $('badge').textContent = isStale(ts) ? 'STALE' : 'LIVE';
+    }
+
+    function tickCountdowns() {
+      document.querySelectorAll('[data-reset]').forEach(el => {
+        const t = Number(el.dataset.reset);
+        if (Number.isFinite(t)) el.textContent = fmtUntil(t);
+      });
+      const payload = currentPayload;
+      if (payload) {
+        $('updatedAt').textContent = fmtUpdated(payload.ts);
+        const stale = isStale(payload.ts);
+        $('badge').dataset.state = stale ? 'stale' : 'fresh';
+        $('badge').textContent = stale ? 'STALE' : 'LIVE';
+      }
+    }
+
+    // ---------- orchestration ----------
+    let currentPayload = null;
+
+    function adoptPayload(payload, source) {
+      currentPayload = payload;
+      saveStored(payload);
+      renderWidget(payload);
+      if (source === 'hash') {
+        // Clean URL without reload
+        history.replaceState(null, '', location.pathname + location.search);
+      }
+    }
+
+    // ---------- events ----------
+    $('openClaudeBtn').addEventListener('click', () => {
+      window.open('https://claude.ai/', '_blank', 'noopener');
+    });
+
+    window.addEventListener('hashchange', () => {
+      const payload = readHashPayload();
+      if (payload) adoptPayload(payload, 'hash');
+    });
+
+    $('bookmarkletLink').addEventListener('click', (e) => {
+      e.preventDefault();
+      alert('Drag this button to your bookmarks bar (don\'t click it here).\n\nThen open claude.ai and click the bookmark.');
+    });
+
+    // ---------- particles ----------
+    (function createParticles() {
+      const container = $('particles');
+      const n = Math.min(40, Math.floor(window.innerWidth / 30));
+      for (let i = 0; i < n; i++) {
+        const p = document.createElement('div');
+        p.className = 'particle';
+        p.style.left = Math.random() * 100 + '%';
+        p.style.animationDuration = (7 + Math.random() * 11) + 's';
+        p.style.animationDelay = -(Math.random() * 18) + 's';
+        const size = (2 + Math.random() * 3);
+        p.style.width = p.style.height = size + 'px';
+        container.appendChild(p);
+      }
+    })();
+
+    // ---------- init ----------
+    installBookmarklet();
+    const fromHash = readHashPayload();
+    if (fromHash) {
+      adoptPayload(fromHash, 'hash');
+    } else {
+      const stored = loadStored();
+      if (stored) {
+        currentPayload = stored;
+        renderWidget(stored);
+      }
+    }
+    setInterval(tickCountdowns, 30_000);
+  </script>
+</body>
+</html>
