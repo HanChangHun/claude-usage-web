@@ -385,16 +385,18 @@
     }
     .steps li {
       counter-increment: step;
-      display: grid;
-      grid-template-columns: 22px 1fr;
-      column-gap: 0.9rem;
-      align-items: start;
+      position: relative;
+      padding-left: calc(22px + 0.9rem);
+      min-height: 22px;
       font-size: 0.92rem;
       color: var(--text-muted);
       line-height: 1.55;
     }
     .steps li::before {
       content: counter(step);
+      position: absolute;
+      left: 0;
+      top: 1px;
       width: 22px; height: 22px;
       background: var(--bg-warm);
       color: var(--text-muted);
@@ -404,7 +406,6 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      margin-top: 1px;
       letter-spacing: 0;
       font-family: 'Inter', sans-serif;
     }
