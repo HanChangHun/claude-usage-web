@@ -6,7 +6,8 @@
   <meta name="theme-color" content="#1F1E1C">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>Claude Usage</title>
+  <title>Claude Usage — desktop quota widget</title>
+  <meta name="description" content="A small Windows desktop widget showing your live Claude.ai quota — Session, Weekly, Sonnet/Opus weekly. Auto-refreshes every 60s in the system tray, auto-updates itself.">
   <link rel="icon" type="image/svg+xml" href="assets/favicon.svg?v=4">
   <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png?v=4">
   <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png?v=4">
@@ -46,8 +47,7 @@
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
     html, body {
-      margin: 0;
-      padding: 0;
+      margin: 0; padding: 0;
       min-height: 100%;
       background: var(--bg);
     }
@@ -60,24 +60,24 @@
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
       padding: clamp(1.5rem, 3vh, 3rem) clamp(1rem, 3vw, 2rem) clamp(3rem, 6vh, 4rem);
-      line-height: 1.5;
+      line-height: 1.55;
       background:
-        radial-gradient(ellipse at top, rgba(217, 119, 87, 0.08) 0%, transparent 60%),
+        radial-gradient(ellipse 80% 50% at 50% 0%, rgba(217, 119, 87, 0.10) 0%, transparent 60%),
         var(--bg);
     }
 
     .container {
-      max-width: 640px;
+      max-width: 720px;
       margin: 0 auto;
       display: flex;
       flex-direction: column;
-      gap: clamp(1rem, 2vh, 1.3rem);
+      gap: clamp(2rem, 5vh, 3.5rem);
     }
 
-    /* ---------- Header ---------- */
-    header {
+    /* ---------- Hero ---------- */
+    header.hero {
       text-align: center;
-      padding: clamp(1rem, 3vh, 2.2rem) 0 clamp(0.5rem, 1vh, 0.8rem);
+      padding: clamp(1rem, 3vh, 2.4rem) 0 0;
     }
     .eyebrow {
       display: inline-flex;
@@ -88,10 +88,10 @@
       color: var(--accent);
       letter-spacing: 0.22em;
       text-transform: uppercase;
-      margin-bottom: 1rem;
+      margin-bottom: 1.2rem;
     }
     .eyebrow .line {
-      width: 1.2rem;
+      width: 1.4rem;
       height: 1px;
       background: var(--accent);
       opacity: 0.5;
@@ -101,49 +101,276 @@
       height: 11px;
       color: var(--accent);
     }
-
     h1 {
       font-family: 'Fraunces', Georgia, 'Times New Roman', serif;
       font-weight: 500;
-      font-size: clamp(2.4rem, 5.5vw, 3.6rem);
-      letter-spacing: -0.015em;
+      font-size: clamp(2.6rem, 6vw, 4rem);
+      letter-spacing: -0.018em;
       line-height: 1.02;
       color: var(--text);
       font-variation-settings: "opsz" 144, "SOFT" 50;
     }
-    .sub {
-      margin-top: 0.7rem;
-      font-size: clamp(0.9rem, 1vw, 0.98rem);
+    .tagline {
+      margin-top: 0.9rem;
+      font-size: clamp(1rem, 1.4vw, 1.18rem);
       color: var(--text-muted);
-      max-width: 38ch;
+      max-width: 36ch;
       margin-left: auto;
       margin-right: auto;
+      line-height: 1.5;
     }
 
-    /* ---------- Card ---------- */
-    .card {
+    .hero-shot {
+      margin: clamp(1.5rem, 3vh, 2.4rem) auto 0;
+      max-width: 540px;
+      width: 100%;
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: var(--shadow-lg);
+      border: 1px solid var(--border);
+      display: block;
+    }
+    .hero-shot img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    /* ---------- CTA ---------- */
+    .cta {
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.55rem;
+    }
+    .download-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.55rem;
+      padding: 0.85rem 1.6rem;
+      background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+      border: none;
+      color: #1F1E1C;
+      border-radius: 10px;
+      text-decoration: none;
+      font-family: 'Inter', sans-serif;
+      font-size: 1.05rem;
+      font-weight: 600;
+      letter-spacing: 0.01em;
+      transition: transform 0.1s, box-shadow 0.15s;
+      box-shadow: 0 2px 8px rgba(217, 119, 87, 0.32);
+    }
+    .download-btn:hover {
+      box-shadow: 0 4px 16px rgba(217, 119, 87, 0.42);
+      transform: translateY(-1px);
+    }
+    .download-btn:active { transform: translateY(0); }
+    .download-btn svg { width: 16px; height: 16px; }
+    .cta-meta {
+      font-size: 0.83rem;
+      color: var(--text-faint);
+      font-variant-numeric: tabular-nums;
+    }
+    .cta-meta a {
+      color: var(--text-muted);
+      text-decoration: none;
+      border-bottom: 1px dashed var(--text-faint);
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .cta-meta a:hover {
+      color: var(--text);
+      border-color: var(--text-muted);
+    }
+
+    /* ---------- Section common ---------- */
+    .section-title {
+      font-family: 'Fraunces', Georgia, serif;
+      font-weight: 500;
+      font-size: clamp(1.4rem, 2.4vw, 1.75rem);
+      letter-spacing: -0.01em;
+      color: var(--text);
+      margin-bottom: 1.2rem;
+      font-variation-settings: "opsz" 72, "SOFT" 50;
+      text-align: center;
+    }
+
+    /* ---------- Features ---------- */
+    .features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: clamp(0.8rem, 1.8vw, 1.2rem);
+    }
+    .feature {
       background: var(--card);
       border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: clamp(1.3rem, 2.5vh, 1.8rem) clamp(1.3rem, 2.5vw, 1.8rem);
+      border-radius: 14px;
+      padding: clamp(1rem, 2.2vh, 1.4rem);
       box-shadow: var(--shadow);
     }
+    .feature .icon {
+      width: 28px;
+      height: 28px;
+      color: var(--accent);
+      margin-bottom: 0.65rem;
+    }
+    .feature h3 {
+      font-family: 'Fraunces', serif;
+      font-weight: 500;
+      font-size: 1.05rem;
+      color: var(--text);
+      margin-bottom: 0.35rem;
+      font-variation-settings: "opsz" 48, "SOFT" 50;
+    }
+    .feature p {
+      font-size: 0.86rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
 
-    /* ---------- Widget ---------- */
+    /* ---------- How it works ---------- */
+    .how-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: clamp(1.3rem, 2.5vh, 1.8rem);
+      box-shadow: var(--shadow);
+    }
+    .steps {
+      list-style: none;
+      counter-reset: step;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.95rem;
+    }
+    .steps li {
+      counter-increment: step;
+      display: flex;
+      gap: 0.95rem;
+      align-items: flex-start;
+      font-size: 0.94rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+    .steps li::before {
+      content: counter(step);
+      flex-shrink: 0;
+      width: 24px; height: 24px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      border-radius: 50%;
+      font-size: 0.78rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 1px;
+    }
+    .steps strong { color: var(--text); font-weight: 600; }
+
+    code {
+      font-family: 'SF Mono', ui-monospace, Menlo, Consolas, monospace;
+      background: var(--bg-warm);
+      padding: 0.1em 0.42em;
+      border-radius: 4px;
+      font-size: 0.87em;
+      color: var(--text);
+    }
+    kbd {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-warm);
+      border: 1px solid var(--border);
+      box-shadow: inset 0 -1.5px 0 rgba(0, 0, 0, 0.35);
+      padding: 0.1em 0.48em;
+      border-radius: 4px;
+      font-size: 0.78em;
+      font-weight: 500;
+      color: var(--text);
+      min-width: 1.6em;
+      display: inline-block;
+      text-align: center;
+    }
+
+    /* ---------- Web mini section ---------- */
+    .web-mini-wrap {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    details.web-mini { padding: 0; }
+    details.web-mini summary {
+      cursor: pointer;
+      user-select: none;
+      padding: 1.1rem 1.4rem;
+      list-style: none;
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      transition: background 0.15s;
+    }
+    details.web-mini summary::-webkit-details-marker { display: none; }
+    details.web-mini summary:hover { background: rgba(255,255,255,0.02); }
+    details.web-mini summary::before {
+      content: "+";
+      display: inline-block;
+      width: 1em;
+      text-align: center;
+      color: var(--accent);
+      font-weight: 400;
+      font-size: 1.2em;
+      transition: transform 0.2s;
+    }
+    details.web-mini[open] summary::before { content: "−"; }
+    details.web-mini summary .label {
+      font-family: 'Fraunces', serif;
+      font-weight: 500;
+      font-size: 1.02rem;
+      color: var(--text);
+      font-variation-settings: "opsz" 48, "SOFT" 50;
+    }
+    details.web-mini summary .meta {
+      margin-left: auto;
+      font-size: 0.78rem;
+      color: var(--text-faint);
+      font-style: italic;
+    }
+    .web-mini-body {
+      padding: 0 1.4rem 1.4rem;
+      border-top: 1px solid var(--border-soft);
+      padding-top: 1.4rem;
+    }
+    .web-mini-body > p {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-bottom: 1rem;
+      line-height: 1.6;
+    }
+
+    /* widget UI inside the web mini section */
+    .widget-card {
+      background: var(--bg);
+      border: 1px solid var(--border-soft);
+      border-radius: 12px;
+      padding: 1.1rem 1.2rem;
+      margin-bottom: 1rem;
+    }
     .widget-header {
       display: flex;
       align-items: baseline;
       justify-content: space-between;
       gap: 0.6rem;
-      margin-bottom: 1.1rem;
-      padding-bottom: 1rem;
+      margin-bottom: 0.95rem;
+      padding-bottom: 0.85rem;
       border-bottom: 1px solid var(--border-soft);
     }
     .widget-title {
-      font-family: 'Fraunces', Georgia, serif;
+      font-family: 'Fraunces', serif;
       font-weight: 500;
-      font-size: 1.15rem;
-      letter-spacing: -0.005em;
+      font-size: 1.05rem;
       color: var(--text);
       font-variation-settings: "opsz" 48, "SOFT" 50;
     }
@@ -151,7 +378,7 @@
       display: inline-flex;
       align-items: center;
       gap: 0.4rem;
-      font-size: 0.75rem;
+      font-size: 0.74rem;
       color: var(--text-faint);
       font-variant-numeric: tabular-nums;
     }
@@ -165,95 +392,31 @@
     .updated-badge[data-state="stale"] .dot { background: var(--warn); }
     .updated-badge[data-state="stale"] { color: var(--warn); }
     @keyframes live-pulse {
-      0% { box-shadow: 0 0 0 0 rgba(107, 143, 63, 0.5); }
-      80% { box-shadow: 0 0 0 8px rgba(107, 143, 63, 0); }
-      100% { box-shadow: 0 0 0 0 rgba(107, 143, 63, 0); }
+      0% { box-shadow: 0 0 0 0 rgba(143, 177, 89, 0.55); }
+      80% { box-shadow: 0 0 0 8px rgba(143, 177, 89, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(143, 177, 89, 0); }
     }
     .updated-badge.pulse .dot { animation: live-pulse 1.2s ease-out; }
-
-    .widget-actions {
-      display: flex;
-      align-items: center;
-      gap: 0.6rem;
-    }
-    .refresh-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.35rem;
-      padding: 0.32rem 0.7rem;
-      background: var(--bg-warm);
-      border: 1px solid var(--border);
-      color: var(--text-muted);
-      border-radius: 6px;
-      font-family: 'Inter', sans-serif;
-      font-size: 0.76rem;
-      font-weight: 500;
-      cursor: pointer;
-      transition: background 0.15s, color 0.15s, border-color 0.15s, opacity 0.15s;
-    }
-    .refresh-btn:hover:not(:disabled) {
-      background: var(--card);
-      color: var(--text);
-      border-color: var(--text-faint);
-    }
-    .refresh-btn:disabled {
-      opacity: 0.45;
-      cursor: not-allowed;
-    }
-    .refresh-btn svg {
-      width: 12px;
-      height: 12px;
-      flex-shrink: 0;
-    }
-    .refresh-btn.spinning svg {
-      animation: spin 0.9s linear infinite;
-    }
-    @keyframes spin {
-      from { transform: rotate(0deg); }
-      to { transform: rotate(360deg); }
-    }
-
-    .mini-toggle {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
-      margin-left: 0.5rem;
-      font-size: 0.82rem;
-      color: var(--text-muted);
-      cursor: pointer;
-      user-select: none;
-      vertical-align: middle;
-    }
-    .mini-toggle input {
-      accent-color: var(--accent);
-      cursor: pointer;
-      margin: 0;
-    }
 
     .widget {
       display: flex;
       flex-direction: column;
-      gap: 1.25rem;
+      gap: 1rem;
     }
-
-    .row {
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-    }
+    .row { display: flex; flex-direction: column; gap: 0.42rem; }
     .row-head {
       display: flex;
       align-items: baseline;
-      gap: 0.75rem;
+      gap: 0.7rem;
       flex-wrap: wrap;
     }
     .row .label {
-      font-size: 0.93rem;
+      font-size: 0.86rem;
       font-weight: 500;
       color: var(--text);
     }
     .row .pct {
-      font-size: 0.92rem;
+      font-size: 0.86rem;
       font-weight: 600;
       color: var(--accent);
       font-variant-numeric: tabular-nums;
@@ -261,10 +424,9 @@
     .row .pct.zero { color: var(--text-faint); font-weight: 500; }
     .row .pct.warn { color: var(--warn); }
     .row .pct.crit { color: var(--crit); }
-
     .row .reset {
       margin-left: auto;
-      font-size: 0.78rem;
+      font-size: 0.74rem;
       color: var(--text-faint);
       display: inline-flex;
       align-items: center;
@@ -272,9 +434,8 @@
       font-variant-numeric: tabular-nums;
     }
     .row .reset svg { width: 11px; height: 11px; flex-shrink: 0; }
-
     .bar {
-      height: 6px;
+      height: 5px;
       background: var(--bg-warm);
       border-radius: 999px;
       overflow: hidden;
@@ -289,332 +450,110 @@
     .bar .fill.crit { background: var(--crit); }
     .bar .fill.zero { background: var(--border); }
 
-    .tier {
-      margin-top: 0.4rem;
-      padding-top: 1.1rem;
-      border-top: 1px solid var(--border-soft);
-      font-size: 0.87rem;
-      color: var(--text-muted);
-      display: flex;
-      align-items: baseline;
-      gap: 0.5rem;
-    }
-    .tier .tier-label {
-      color: var(--text-faint);
-    }
-    .tier strong {
-      color: var(--accent);
-      font-weight: 600;
-      font-variant-numeric: tabular-nums;
-    }
-    .tier .tier-of {
-      color: var(--text-faint);
-      font-variant-numeric: tabular-nums;
-      margin-left: auto;
-    }
-
-    /* Empty state */
-    .empty {
+    .empty-mini {
       text-align: center;
-      padding: 1.4rem 0.5rem 0.6rem;
-    }
-    .empty .star {
-      width: 34px; height: 34px;
-      margin: 0 auto 1rem;
-      color: var(--accent);
-      opacity: 0.7;
-    }
-    .empty .big {
-      font-family: 'Fraunces', serif;
-      font-weight: 500;
-      font-size: 1.12rem;
-      color: var(--text);
-      margin-bottom: 0.45rem;
-      font-variation-settings: "opsz" 48, "SOFT" 50;
-    }
-    .empty p {
-      font-size: 0.9rem;
-      color: var(--text-muted);
-      max-width: 34ch;
-      margin: 0 auto;
-      line-height: 1.6;
-    }
-
-    /* Refresh row */
-    .refresh-row {
-      margin-top: 1.1rem;
-      padding-top: 1rem;
-      border-top: 1px solid var(--border-soft);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 0.8rem;
-      flex-wrap: wrap;
-    }
-    .refresh-row .hint {
-      font-size: 0.8rem;
+      padding: 1.2rem 0.5rem;
       color: var(--text-faint);
-    }
-
-    /* ---------- Snippet section ---------- */
-    .section-title {
-      font-family: 'Fraunces', Georgia, serif;
-      font-weight: 500;
-      font-size: 1.15rem;
-      color: var(--text);
-      margin-bottom: 1.1rem;
-      font-variation-settings: "opsz" 48, "SOFT" 50;
-      display: flex;
-      align-items: center;
-      gap: 0.6rem;
-    }
-    .section-title .num {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 1.6em;
-      height: 1.6em;
-      font-family: 'Inter', sans-serif;
-      font-size: 0.78rem;
-      font-weight: 600;
-      color: var(--accent);
-      background: var(--accent-soft);
-      border-radius: 50%;
-    }
-
-    .steps {
-      list-style: none;
-      counter-reset: step;
-      padding: 0;
-      margin: 0 0 1.2rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.9rem;
-    }
-    .steps li {
-      counter-increment: step;
-      position: relative;
-      padding-left: calc(22px + 0.9rem);
-      min-height: 22px;
-      font-size: 0.92rem;
-      color: var(--text-muted);
-      line-height: 1.55;
-    }
-    .steps li::before {
-      content: counter(step);
-      position: absolute;
-      left: 0;
-      top: 1px;
-      width: 22px; height: 22px;
-      background: var(--bg-warm);
-      color: var(--text-muted);
-      border-radius: 50%;
-      font-size: 0.76rem;
-      font-weight: 600;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      letter-spacing: 0;
-      font-family: 'Inter', sans-serif;
-    }
-    .steps strong { color: var(--text); font-weight: 600; }
-
-    code {
-      font-family: 'SF Mono', ui-monospace, 'Menlo', 'Cascadia Mono', Consolas, monospace;
-      background: var(--bg-warm);
-      padding: 0.1em 0.42em;
-      border-radius: 4px;
-      font-size: 0.87em;
-      color: var(--text);
-    }
-
-    kbd {
-      font-family: 'Inter', -apple-system, sans-serif;
-      background: var(--bg-warm);
-      border: 1px solid var(--border);
-      box-shadow: inset 0 -1.5px 0 rgba(0, 0, 0, 0.35);
-      padding: 0.1em 0.48em;
-      border-radius: 4px;
-      font-size: 0.78em;
-      font-weight: 500;
-      color: var(--text);
-      min-width: 1.6em;
-      display: inline-block;
-      text-align: center;
+      font-size: 0.86rem;
     }
 
     .snippet-box {
       position: relative;
       background: var(--bg-sunk);
       border: 1px solid var(--border-soft);
-      border-radius: 10px;
-      padding: 0.95rem 5.2rem 0.95rem 1rem;
+      border-radius: 8px;
+      padding: 0.75rem 4.8rem 0.75rem 0.85rem;
       font-family: 'SF Mono', ui-monospace, Menlo, Consolas, monospace;
-      font-size: 0.76rem;
+      font-size: 0.72rem;
       color: var(--text);
       line-height: 1.55;
       overflow-x: auto;
       white-space: pre;
-    }
-    .snippet-box code {
-      background: transparent;
-      padding: 0;
-      border-radius: 0;
-      color: inherit;
-      font-size: inherit;
+      margin-bottom: 0.7rem;
     }
     .snippet-box::-webkit-scrollbar { height: 6px; }
-    .snippet-box::-webkit-scrollbar-track { background: transparent; }
     .snippet-box::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-
     .copy-btn {
       position: absolute;
-      top: 10px; right: 10px;
-      padding: 0.45rem 0.9rem;
+      top: 8px; right: 8px;
+      padding: 0.35rem 0.75rem;
       background: var(--accent);
       border: none;
       color: #1F1E1C;
-      border-radius: 7px;
+      border-radius: 6px;
       font-family: 'Inter', sans-serif;
-      font-size: 0.78rem;
+      font-size: 0.74rem;
       font-weight: 600;
       cursor: pointer;
-      letter-spacing: 0;
-      transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+      transition: background 0.15s;
     }
-    .copy-btn:hover {
-      background: var(--accent-strong);
-      box-shadow: 0 2px 8px rgba(217, 119, 87, 0.3);
-    }
-    .copy-btn:active { transform: translateY(1px); }
-    .copy-btn.copied {
-      background: var(--ok);
-      color: #1F1E1C;
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-    }
+    .copy-btn:hover { background: var(--accent-strong); }
+    .copy-btn.copied { background: var(--ok); }
 
-    .warn-note {
-      margin-top: 1rem;
-      padding: 0.75rem 0.95rem;
-      background: var(--warn-bg);
-      border: 1px solid var(--warn-border);
-      border-left: 3px solid var(--warn);
-      border-radius: 8px;
-      font-size: 0.83rem;
-      color: var(--warn-text);
+    .mini-steps {
+      list-style: none;
+      counter-reset: ms;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.55rem;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      margin-bottom: 0.8rem;
+    }
+    .mini-steps li {
+      counter-increment: ms;
+      display: flex;
+      gap: 0.7rem;
+      align-items: flex-start;
       line-height: 1.55;
     }
-    .warn-note em { font-style: italic; color: inherit; }
-
-    details {
-      margin-top: 1rem;
-      padding-top: 1rem;
-      border-top: 1px solid var(--border-soft);
-      font-size: 0.88rem;
+    .mini-steps li::before {
+      content: counter(ms);
+      flex-shrink: 0;
+      width: 18px; height: 18px;
+      background: var(--bg-warm);
       color: var(--text-muted);
-    }
-    details summary {
-      cursor: pointer;
-      user-select: none;
-      padding: 0.2rem 0;
-      font-weight: 500;
-      color: var(--text);
-      transition: color 0.2s;
-      list-style: none;
+      border-radius: 50%;
+      font-size: 0.7rem;
+      font-weight: 600;
       display: inline-flex;
       align-items: center;
-      gap: 0.5rem;
-    }
-    details summary::-webkit-details-marker { display: none; }
-    details summary::before {
-      content: "+";
-      display: inline-block;
-      width: 1em;
-      text-align: center;
-      color: var(--accent);
-      font-weight: 400;
-      font-size: 1.1em;
-      transition: transform 0.2s;
-    }
-    details[open] summary::before { content: "−"; }
-    details summary:hover { color: var(--accent-strong); }
-    details > *:not(summary) {
-      margin-top: 0.7rem;
-      padding-left: 1.5em;
-      line-height: 1.7;
+      justify-content: center;
+      margin-top: 1px;
     }
 
-    .linkbtn {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.3rem;
-      background: linear-gradient(135deg, var(--accent), var(--accent-strong));
-      border: none;
-      color: #1F1E1C;
-      border-radius: 7px;
-      padding: 0.4rem 0.85rem;
-      font-family: 'Inter', sans-serif;
-      font-size: 0.82rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: transform 0.1s, box-shadow 0.15s;
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
-      vertical-align: middle;
-    }
-    .linkbtn:hover { box-shadow: 0 2px 8px rgba(217, 119, 87, 0.3); }
-    .linkbtn:active { transform: translateY(1px); }
-    .step-hint {
-      display: block;
-      margin-top: 0.3rem;
+    /* ---------- Footer ---------- */
+    footer.repo-footer {
+      text-align: center;
       font-size: 0.8rem;
       color: var(--text-faint);
-      font-style: italic;
+      margin-top: 1rem;
     }
-
-    button.ghost {
-      background: var(--card);
-      border: 1px solid var(--border);
-      color: var(--text-muted);
-      border-radius: 8px;
-      padding: 0.55rem 1rem;
-      font-size: 0.85rem;
-      font-family: 'Inter', sans-serif;
-      font-weight: 500;
-      cursor: pointer;
-      transition: background 0.15s, color 0.15s, border-color 0.15s;
-    }
-    button.ghost:hover {
-      background: var(--bg-warm);
-      color: var(--text);
-      border-color: var(--text-faint);
-    }
-
-    .credit {
-      margin-top: clamp(1.8rem, 3.5vh, 2.8rem);
-      text-align: center;
-      font-size: 0.78rem;
-      color: var(--text-faint);
-    }
-    .credit a {
+    footer.repo-footer a {
       color: var(--accent);
       text-decoration: none;
       font-weight: 500;
       transition: color 0.15s;
     }
-    .credit a:hover { color: var(--accent-strong); }
+    footer.repo-footer a:hover { color: var(--accent-strong); }
+    footer.repo-footer .sep {
+      margin: 0 0.5rem;
+      color: var(--text-faint);
+    }
 
     .hidden { display: none !important; }
 
-    @media (max-width: 480px) {
-      .widget-header { flex-direction: column; align-items: flex-start; gap: 0.3rem; }
-      .snippet-box { font-size: 0.72rem; padding-right: 4.8rem; }
+    @media (max-width: 540px) {
+      .features { grid-template-columns: 1fr; }
+      details.web-mini summary .meta { display: none; }
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <header>
+    <!-- HERO -->
+    <header class="hero">
       <div class="eyebrow">
         <span class="line"></span>
         <svg class="star-mark" viewBox="-12 -12 24 24" fill="currentColor" aria-hidden="true">
@@ -624,85 +563,119 @@
         <span class="line"></span>
       </div>
       <h1>Claude Usage</h1>
-      <p class="sub">A live look at your Claude.ai limits — session (5h), weekly, and per-model.</p>
+      <p class="tagline">Live Claude.ai quota in your system tray. Auto-refreshing, auto-updating.</p>
+      <a class="hero-shot" href="assets/screenshot-desktop.png" target="_blank" rel="noopener">
+        <img src="assets/screenshot-desktop.png" alt="Claude Usage desktop widget showing Session 20%, Weekly 25%, Sonnet weekly 0%, with the Settings panel open." loading="eager">
+      </a>
     </header>
 
-    <section class="card">
-      <div class="widget-header">
-        <div class="widget-title">Your quota</div>
-        <div class="widget-actions">
-          <button class="refresh-btn" id="refreshBtn" disabled title="Open claude.ai and run the snippet to enable">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
-            <span>Refresh</span>
-          </button>
-          <div class="updated-badge" id="updatedBadge"><span class="dot"></span><span id="updatedText">Not connected</span></div>
+    <!-- CTA -->
+    <section class="cta">
+      <a class="download-btn" href="https://github.com/HanChangHun/claude-usage/releases/latest" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Download for Windows
+      </a>
+      <p class="cta-meta">
+        MSI installer · auto-updates after install ·
+        <a href="https://github.com/HanChangHun/claude-usage/releases/latest" target="_blank" rel="noopener">all releases</a>
+      </p>
+    </section>
+
+    <!-- FEATURES -->
+    <section>
+      <h2 class="section-title">Three reasons to install</h2>
+      <div class="features">
+        <div class="feature">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10"/><path d="M20.49 15a9 9 0 0 1-14.85 3.36L1 14"/></svg>
+          <h3>Live, every 60 s</h3>
+          <p>The hidden webview reads your session and pings <code>/usage</code> on a steady tick — no console paste, no extra tabs.</p>
         </div>
-      </div>
-      <div class="widget" id="widget">
-        <div class="empty" id="emptyState">
-          <svg class="star" viewBox="-12 -12 24 24" fill="currentColor" aria-hidden="true">
-            <path d="M0 -11 C1.2 -3 3 -1.2 11 0 C3 1.2 1.2 3 0 11 C-1.2 3 -3 1.2 -11 0 C-3 -1.2 -1.2 -3 0 -11 Z"/>
-          </svg>
-          <div class="big">No usage data yet</div>
-          <p>Run the snippet below on a <code>claude.ai</code> tab — your limits will appear here and refresh every minute.</p>
+        <div class="feature">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="12" cy="12" r="2.5"/></svg>
+          <h3>Tray-resident</h3>
+          <p>Park it on a second monitor or hide it in the tray. Toggle "Start with Windows" once and forget about it.</p>
         </div>
-      </div>
-      <div class="refresh-row hidden" id="refreshRow">
-        <span class="hint">Updates automatically while the claude.ai tab is open.</span>
-        <button class="ghost" id="openClaudeBtn">Open claude.ai ↗</button>
+        <div class="feature">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+          <h3>Updates itself</h3>
+          <p>Install once. New versions are signed (Ed25519), auto-downloaded from GitHub, and applied on the next launch.</p>
+        </div>
       </div>
     </section>
 
-    <section class="card">
-      <div class="section-title"><span class="num">1</span>Fetch your usage</div>
-      <ol class="steps">
-        <li><strong>Open a linked claude.ai tab:</strong> <button type="button" class="linkbtn" id="openClaudeStep">Open claude.ai ↗</button> <label class="mini-toggle" title="Open as a compact popup window you can move to another virtual desktop, monitor, or minimize out of the way."><input type="checkbox" id="miniMode"> mini window</label><br><span class="step-hint">This ties the two tabs together so updates can push without stealing focus. Don't use an existing claude.ai tab — it won't be linked.</span></li>
-        <li>In that new tab, press <kbd>F12</kbd> (or <kbd>⌘</kbd>+<kbd>⌥</kbd>+<kbd>I</kbd> on Mac) and switch to the <strong>Console</strong> tab.</li>
-        <li>Copy the snippet below, paste it, and press <kbd>Enter</kbd>. Your quota will appear here and refresh every 60 seconds while the linked tab stays open.</li>
-      </ol>
-      <div class="snippet-box">
+    <!-- HOW IT WORKS -->
+    <section>
+      <h2 class="section-title">Three-step setup</h2>
+      <div class="how-card">
+        <ol class="steps">
+          <li><strong>Download &amp; run the MSI.</strong> Windows SmartScreen will warn — click <em>More info → Run anyway</em>. The installer drops a tray icon and opens the main window.</li>
+          <li><strong>Sign in to claude.ai once.</strong> An embedded webview pops up on first launch. Use email login (Google OAuth is blocked inside embedded webviews — that's a Google policy, not ours).</li>
+          <li><strong>That's it.</strong> The widget renders your live quota and refreshes every minute. Toggle <em>Start with Windows</em> in the gear menu if you want it always-on.</li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- WEB MINI VERSION -->
+    <section>
+      <h2 class="section-title">Or use the web mini version</h2>
+      <div class="web-mini-wrap">
+        <details class="web-mini">
+          <summary>
+            <span class="label">Web mini version (no install)</span>
+            <span class="meta">DevTools paste · works anywhere</span>
+          </summary>
+          <div class="web-mini-body">
+            <p>
+              The original "fun" mode kept around for unusual cases — you're on someone else's PC, you're on macOS / Linux, or you just want a peek without installing. It pastes a tiny snippet into the claude.ai DevTools console; that snippet pushes the same JSON over to this page via <code>postMessage</code>.
+            </p>
+
+            <div class="widget-card">
+              <div class="widget-header">
+                <div class="widget-title">Quota</div>
+                <div class="updated-badge" id="updatedBadge"><span class="dot"></span><span id="updatedText">Not connected</span></div>
+              </div>
+              <div class="widget" id="widget">
+                <div class="empty-mini" id="emptyState">Run the snippet on a claude.ai tab — your limits will appear here.</div>
+              </div>
+            </div>
+
+            <ol class="mini-steps">
+              <li>Open <code>claude.ai</code> (logged in), press <kbd>F12</kbd> → <strong>Console</strong> tab.</li>
+              <li>Copy the snippet below, paste it, press <kbd>Enter</kbd>. Type <code>allow pasting</code> if Chrome asks.</li>
+              <li>This page updates here while the claude.ai tab stays open.</li>
+            </ol>
+
+            <div class="snippet-box">
 <code id="snippetCode">loading…</code>
 <button class="copy-btn" id="copyBtn">Copy</button>
+            </div>
+          </div>
+        </details>
       </div>
-      <div class="warn-note">
-        Chrome may warn <em>"Don't paste code you don't understand."</em> That's expected for any DevTools paste. Read the snippet above, or expand <em>What does it do?</em> below.
-      </div>
-      <details>
-        <summary>Why do I have to open claude.ai from this page?</summary>
-        <div>
-          Browsers isolate tabs opened directly by the user (typing a URL, clicking a bookmark) into separate <em>browsing-context groups</em> for security. Cross-origin <code>postMessage</code> needs an explicit link between two tabs. When this page calls <code>window.open('https://claude.ai')</code>, the child inherits a <code>window.opener</code> reference back to this tab — which the snippet uses to push updates without stealing focus.
-        </div>
-      </details>
-      <details>
-        <summary>What does the snippet do? Is it safe?</summary>
-        <div>
-          The snippet reads your <code>lastActiveOrg</code> cookie (an organization ID, not a secret) and calls <code>claude.ai/api/organizations/&lt;org&gt;/usage</code> using your existing logged-in session — the same request claude.ai makes to render its sidebar widget. The response is sent to this page via <code>postMessage</code> (or URL hash on first contact). No data is sent to any third-party server. Your Claude session cookie never leaves claude.ai.
-        </div>
-      </details>
-      <details>
-        <summary>How do I stop the auto-refresh?</summary>
-        <div>
-          Either close the claude.ai tab, or run <code>clearInterval(__cuw.iv)</code> in the same console where you started it. Reloading the claude.ai tab also stops it — you'd re-open via the button and re-paste to resume.
-        </div>
-      </details>
     </section>
-  </div>
 
-  <p class="credit"><a href="https://github.com/HanChangHun/claude-usage-web" target="_blank" rel="noopener">Source on GitHub ↗</a></p>
+    <footer class="repo-footer">
+      <a href="https://github.com/HanChangHun/claude-usage" target="_blank" rel="noopener">github.com/HanChangHun/claude-usage</a>
+      <span class="sep">·</span>
+      MIT
+      <span class="sep">·</span>
+      built with <a href="https://tauri.app" target="_blank" rel="noopener">Tauri</a>
+    </footer>
+  </div>
 
   <script>
     const STORAGE_KEY = 'claude-usage-web:v2';
     const $ = (id) => document.getElementById(id);
 
-    // ---------- snippet generation ----------
-    // Continuous variant: opens our site once, then postMessages updates every 60s.
-    // Running the snippet a second time clears the old interval and restarts.
+    let lastPayload = null;
+
+    // ---------- snippet generation (auto-refresh continuous version) ----------
     function buildSnippetSource() {
       const site = location.origin + location.pathname.replace(/index\.html$/, '');
-      return `(async()=>{if(location.hostname!=='claude.ai'){alert('[Claude Usage] Run this on a claude.ai tab.');return;}let o;try{o=document.cookie.split('; ').find(r=>r.startsWith('lastActiveOrg='));}catch(e){alert('[Claude Usage] Cookie access denied. Run this on the main claude.ai tab.');return;}if(!o){alert('[Claude Usage] lastActiveOrg cookie not found. Please log in and try again.');return;}const org=o.split('=')[1];const SITE=${JSON.stringify(site)};const ORIGIN=new URL(SITE).origin;if(window.__cuw){if(window.__cuw.iv)clearInterval(window.__cuw.iv);if(window.__cuw.onMsg)removeEventListener('message',window.__cuw.onMsg);}let win=window.__cuw?.win||null;const enc=(p)=>btoa(String.fromCharCode.apply(null,new TextEncoder().encode(JSON.stringify(p)))).replace(/\\+/g,'-').replace(/\\//g,'_').replace(/=+$/,'');const send=(p)=>{try{if(window.opener&&!window.opener.closed){window.opener.postMessage({src:'claude-usage',payload:p},ORIGIN);return'opener';}}catch(e){}try{if(win&&!win.closed){win.postMessage({src:'claude-usage',payload:p},ORIGIN);return'win';}}catch(e){}win=window.open(SITE+'#d='+enc(p),'claude-usage-web');if(window.__cuw)window.__cuw.win=win;return'open';};const tick=async()=>{try{const r=await fetch('/api/organizations/'+org+'/usage',{credentials:'include',headers:{'accept':'application/json'}});if(!r.ok){console.warn('[Claude Usage] HTTP',r.status);return;}const d=await r.json();const p={v:1,ts:Date.now(),data:d};const route=send(p);console.log('[Claude Usage] push via',route,'at',new Date(p.ts).toLocaleTimeString());}catch(e){console.warn('[Claude Usage] tick error:',e);}};const onMsg=(e)=>{if(e.origin!==ORIGIN)return;const m=e.data;if(m&&m.src==='claude-usage-web'&&m.cmd==='tick'){console.log('[Claude Usage] manual tick requested by viewer');tick();}};addEventListener('message',onMsg);await tick();const iv=setInterval(tick,60000);window.__cuw={iv,win,onMsg};console.log('[Claude Usage] Auto-refresh every 60s. Stop: clearInterval(__cuw.iv)');if(!window.opener){console.info('[Claude Usage] No opener detected — a dedicated tab will be opened for updates. This works fine, just uses a fresh tab instead of your existing site tab. To route into your existing site tab, relaunch claude.ai via the site\\'s \"Open claude.ai\" button.');}})();`;
+      return `(async()=>{if(location.hostname!=='claude.ai'){alert('[Claude Usage] Run this on a claude.ai tab.');return;}let o;try{o=document.cookie.split('; ').find(r=>r.startsWith('lastActiveOrg='));}catch(e){alert('[Claude Usage] Cookie access denied. Run this on the main claude.ai tab.');return;}if(!o){alert('[Claude Usage] lastActiveOrg cookie not found. Please log in and try again.');return;}const org=o.split('=')[1];const SITE=${JSON.stringify(site)};const ORIGIN=new URL(SITE).origin;if(window.__cuw&&window.__cuw.iv)clearInterval(window.__cuw.iv);let win=window.__cuw?.win||null;const enc=(p)=>btoa(String.fromCharCode.apply(null,new TextEncoder().encode(JSON.stringify(p)))).replace(/\\+/g,'-').replace(/\\//g,'_').replace(/=+$/,'');const send=(p)=>{try{if(window.opener&&!window.opener.closed){window.opener.postMessage({src:'claude-usage',payload:p},ORIGIN);return'opener';}}catch(e){}try{if(win&&!win.closed){win.postMessage({src:'claude-usage',payload:p},ORIGIN);return'win';}}catch(e){}win=window.open(SITE+'#d='+enc(p),'claude-usage-web');if(window.__cuw)window.__cuw.win=win;return'open';};const tick=async()=>{try{const r=await fetch('/api/organizations/'+org+'/usage',{credentials:'include',headers:{'accept':'application/json'}});if(!r.ok){console.warn('[Claude Usage] HTTP',r.status);return;}const d=await r.json();const p={v:1,ts:Date.now(),data:d};const route=send(p);console.log('[Claude Usage] push via',route,'at',new Date(p.ts).toLocaleTimeString());}catch(e){console.warn('[Claude Usage] tick error:',e);}};await tick();const iv=setInterval(tick,60000);window.__cuw={iv,win};console.log('[Claude Usage] Auto-refresh every 60s. Stop: clearInterval(__cuw.iv)');})();`;
     }
 
-    function installSnippets() {
+    function installSnippet() {
       $('snippetCode').textContent = buildSnippetSource();
     }
 
@@ -716,9 +689,6 @@
           btn.classList.add('copied');
           setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 1600);
         } catch {
-          const r = document.createRange();
-          r.selectNodeContents($('snippetCode'));
-          const s = getSelection(); s.removeAllRanges(); s.addRange(r);
           btn.textContent = '⌘/Ctrl+C';
         }
       });
@@ -733,17 +703,15 @@
       for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
       return new TextDecoder().decode(bytes);
     }
-
     function readHashPayload() {
       const m = location.hash.match(/[#&]d=([A-Za-z0-9_\-]+)/);
       if (!m) return null;
       try {
         const payload = JSON.parse(b64urlDecode(m[1]));
         if (payload && payload.data && typeof payload.data === 'object') return payload;
-      } catch (e) { console.warn('hash decode failed', e); }
+      } catch {}
       return null;
     }
-
     function loadStored() {
       try {
         const raw = localStorage.getItem(STORAGE_KEY);
@@ -753,7 +721,6 @@
       } catch {}
       return null;
     }
-
     function saveStored(p) {
       try { localStorage.setItem(STORAGE_KEY, JSON.stringify(p)); } catch {}
     }
@@ -770,7 +737,6 @@
       if (h > 0) return `${h}h ${m}m`;
       return `${m}m`;
     }
-
     function fmtUpdated(ts) {
       const diff = Date.now() - ts;
       if (diff < 45_000) return 'Updated just now';
@@ -781,43 +747,37 @@
       const d = Math.floor(h / 24);
       return `Updated ${d}d ago`;
     }
-
     function isStale(ts) { return Date.now() - ts > 10 * 60_000; }
-
     function pctClass(p) {
       if (p === 0) return 'zero';
       if (p >= 90) return 'crit';
       if (p >= 70) return 'warn';
       return '';
     }
+    function clockIcon() {
+      return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9.5"/><polyline points="12 6.5 12 12 16 14"/></svg>`;
+    }
 
-    // ---------- rendering ----------
     const LIMIT_DEFS = [
       { key: 'five_hour',        label: 'Session (5h)' },
       { key: 'seven_day',        label: 'Weekly' },
       { key: 'seven_day_opus',   label: 'Opus weekly' },
       { key: 'seven_day_sonnet', label: 'Sonnet weekly' },
     ];
-
-    function clockIcon() {
-      return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9.5"/><polyline points="12 6.5 12 12 16 14"/></svg>`;
-    }
-
     function renderRow(label, limit) {
       const pct = Math.max(0, Math.min(100, Number(limit.utilization) || 0));
       const resetAt = limit.resets_at ? new Date(limit.resets_at).getTime() : null;
-      const pCls = pctClass(pct);
+      const cls = pctClass(pct);
       return `
         <div class="row">
           <div class="row-head">
             <span class="label">${label}</span>
-            <span class="pct ${pCls}">${Math.round(pct)}%</span>
-            ${resetAt ? `<span class="reset" title="Resets at ${new Date(resetAt).toLocaleString()}">${clockIcon()}<span data-reset="${resetAt}">${fmtUntil(resetAt)}</span></span>` : ''}
+            <span class="pct ${cls}">${Math.round(pct)}%</span>
+            ${resetAt ? `<span class="reset"><span data-reset="${resetAt}">${fmtUntil(resetAt)}</span></span>` : ''}
           </div>
-          <div class="bar"><div class="fill ${pCls}" style="width:${pct}%"></div></div>
+          <div class="bar"><div class="fill ${cls}" style="width:${pct}%"></div></div>
         </div>`;
     }
-
     function renderWidget(payload) {
       const { data, ts } = payload;
       const widget = $('widget');
@@ -826,142 +786,54 @@
         const v = data[def.key];
         if (v && typeof v.utilization === 'number') rows.push(renderRow(def.label, v));
       }
-      let extra = '';
-      if (data.extra_usage?.is_enabled) {
-        const used = Number(data.extra_usage.used_credits) || 0;
-        const lim = Number(data.extra_usage.monthly_limit) || 0;
-        extra = `<div class="tier"><span class="tier-label">Extra usage</span><strong>$${(used/100).toFixed(2)}</strong><span class="tier-of">of $${(lim/100).toFixed(2)}</span></div>`;
-      }
       widget.innerHTML = rows.length === 0
-        ? `<div class="empty"><div class="big">No limits reported</div><p>The response didn't contain any quota fields. Try again, or verify you're logged into claude.ai.</p></div>`
-        : rows.join('') + extra;
-      $('refreshRow').classList.remove('hidden');
+        ? `<div class="empty-mini">No limits reported.</div>`
+        : rows.join('');
       $('updatedText').textContent = fmtUpdated(ts);
       $('updatedBadge').dataset.state = isStale(ts) ? 'stale' : 'fresh';
     }
-
-    function tickCountdowns() {
-      document.querySelectorAll('[data-reset]').forEach(el => {
-        const t = Number(el.dataset.reset);
-        if (Number.isFinite(t)) el.textContent = fmtUntil(t);
-      });
-      if (currentPayload) {
-        $('updatedText').textContent = fmtUpdated(currentPayload.ts);
-        $('updatedBadge').dataset.state = isStale(currentPayload.ts) ? 'stale' : 'fresh';
-      }
-    }
-
-    // ---------- orchestration ----------
-    let currentPayload = null;
-    let claudeSource = null;
-    let refreshTimeoutId = null;
-    const MINI_KEY = 'claude-usage-web:mini';
-
-    function adoptPayload(payload, source) {
-      currentPayload = payload;
-      saveStored(payload);
-      renderWidget(payload);
-      if (source === 'hash') {
-        history.replaceState(null, '', location.pathname + location.search);
-      }
-    }
-
-    function updateRefreshBtn() {
-      const btn = $('refreshBtn');
-      const ok = claudeSource && !claudeSource.closed;
-      if (!btn.classList.contains('spinning')) btn.disabled = !ok;
-      btn.title = ok
-        ? 'Fetch the latest usage from your claude.ai tab now.'
-        : 'Open claude.ai and run the snippet to enable.';
-    }
-
-    function stopSpinner() {
-      const btn = $('refreshBtn');
-      btn.classList.remove('spinning');
-      if (refreshTimeoutId) { clearTimeout(refreshTimeoutId); refreshTimeoutId = null; }
-      updateRefreshBtn();
-    }
-
-    $('refreshBtn').addEventListener('click', () => {
-      if (!claudeSource || claudeSource.closed) {
-        claudeSource = null;
-        updateRefreshBtn();
-        return;
-      }
-      try {
-        claudeSource.postMessage({ src: 'claude-usage-web', cmd: 'tick' }, 'https://claude.ai');
-      } catch (err) {
-        claudeSource = null;
-        updateRefreshBtn();
-        return;
-      }
-      const btn = $('refreshBtn');
-      btn.classList.add('spinning');
-      btn.disabled = true;
-      if (refreshTimeoutId) clearTimeout(refreshTimeoutId);
-      refreshTimeoutId = setTimeout(stopSpinner, 5000);
-    });
-
-    // Mini window toggle — persist preference.
-    const miniCheckbox = $('miniMode');
-    try { miniCheckbox.checked = localStorage.getItem(MINI_KEY) === '1'; } catch {}
-    miniCheckbox.addEventListener('change', () => {
-      try { localStorage.setItem(MINI_KEY, miniCheckbox.checked ? '1' : '0'); } catch {}
-    });
-
-    // The bottom-right "Open claude.ai" button uses noopener (no linking —
-    // user just wants to visit). The step-1 button below creates the linked
-    // child tab with an opener relationship.
-    $('openClaudeBtn').addEventListener('click', () => {
-      window.open('https://claude.ai/', '_blank', 'noopener');
-    });
-    $('openClaudeStep').addEventListener('click', () => {
-      // NO 'noopener' here — we WANT the child to see us as its opener,
-      // so its snippet can postMessage back to this tab.
-      // When mini is on, ask the browser for a popup window instead of a tab
-      // so the user can park it on another virtual desktop / monitor.
-      const features = miniCheckbox.checked ? 'popup,width=480,height=360' : '';
-      window.open('https://claude.ai/', 'cuw-claude-tab', features);
-    });
-
-    window.addEventListener('hashchange', () => {
-      const payload = readHashPayload();
-      if (payload) adoptPayload(payload, 'hash');
-    });
-
-    // Live updates from the continuous snippet running on claude.ai
-    window.addEventListener('message', (e) => {
-      if (e.origin !== 'https://claude.ai') return;
-      const msg = e.data;
-      if (msg && msg.src === 'claude-usage' && msg.payload && msg.payload.data) {
-        claudeSource = e.source;
-        stopSpinner();
-        adoptPayload(msg.payload, 'postMessage');
-        pulseLive();
-      }
-    });
-
-    // Periodically re-check the claude.ai window — if the user closed it,
-    // the refresh button should dim without waiting for a click.
-    setInterval(() => {
-      if (claudeSource && claudeSource.closed) {
-        claudeSource = null;
-        updateRefreshBtn();
-      }
-    }, 5000);
-
     function pulseLive() {
       const el = $('updatedBadge');
       el.classList.remove('pulse');
       void el.offsetWidth;
       el.classList.add('pulse');
     }
+    function tickCountdowns() {
+      document.querySelectorAll('[data-reset]').forEach(el => {
+        const t = Number(el.dataset.reset);
+        if (Number.isFinite(t)) el.textContent = fmtUntil(t);
+      });
+      if (lastPayload) {
+        $('updatedText').textContent = fmtUpdated(lastPayload.ts);
+        $('updatedBadge').dataset.state = isStale(lastPayload.ts) ? 'stale' : 'fresh';
+      }
+    }
+
+    // ---------- orchestration ----------
+    function adoptPayload(payload, source) {
+      lastPayload = payload;
+      saveStored(payload);
+      renderWidget(payload);
+      pulseLive();
+      if (source === 'hash') {
+        history.replaceState(null, '', location.pathname + location.search);
+      }
+    }
+    window.addEventListener('hashchange', () => {
+      const p = readHashPayload();
+      if (p) adoptPayload(p, 'hash');
+    });
+    window.addEventListener('message', (e) => {
+      if (e.origin !== 'https://claude.ai') return;
+      const m = e.data;
+      if (m && m.src === 'claude-usage' && m.payload && m.payload.data) {
+        adoptPayload(m.payload, 'postMessage');
+      }
+    });
 
     // ---------- init ----------
-    // Claim the 'claude-usage-web' name so the snippet's window.open(SITE, 'claude-usage-web')
-    // targets THIS tab instead of spawning a new one.
     try { window.name = 'claude-usage-web'; } catch {}
-    installSnippets();
+    installSnippet();
     wireCopyButton();
     const fromHash = readHashPayload();
     if (fromHash) {
@@ -969,7 +841,7 @@
     } else {
       const stored = loadStored();
       if (stored) {
-        currentPayload = stored;
+        lastPayload = stored;
         renderWidget(stored);
       }
     }

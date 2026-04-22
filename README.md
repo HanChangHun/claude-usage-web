@@ -1,10 +1,32 @@
-# Claude Usage Web
+# Claude Usage
 
-A static, single-file site that mirrors your **Claude.ai quota** — Session (5h), Weekly, Sonnet/Opus Weekly, and any extra-usage balance — and keeps it refreshing every 60 seconds as long as a claude.ai tab stays open.
+A small Windows desktop widget that shows your live **Claude.ai quota** — Session (5h), Weekly, Sonnet/Opus weekly, and any extra-usage balance — auto-refreshing every 60 seconds in the system tray.
 
-Live: **https://hanchanghun.github.io/claude-usage-web/**
+[![Latest release](https://img.shields.io/github/v/release/HanChangHun/claude-usage)](https://github.com/HanChangHun/claude-usage/releases/latest)
+[![Landing page](https://img.shields.io/badge/site-hanchanghun.github.io%2Fclaude--usage-cc785c)](https://hanchanghun.github.io/claude-usage/)
 
-## How it works
+![Claude Usage desktop widget](assets/screenshot-desktop.png)
+
+---
+
+## ⬇️ Install (Windows)
+
+Download the latest **MSI** from [Releases](https://github.com/HanChangHun/claude-usage/releases/latest), double-click, and you're done.
+
+> Windows SmartScreen will warn about an unknown publisher (the binary isn't code-signed). Click **More info → Run anyway** to install.
+
+After installing once, **future versions update themselves** — the in-app updater fetches signed releases from GitHub and applies them on the next launch (no more MSI re-installs).
+
+## ✨ What it does
+
+- A 440×420 main window with a clean dark widget showing all four limits + reset countdowns + extra-usage balance.
+- A **system tray icon** so you can park it out of the way; left-click to show the window, right-click for menu.
+- **Settings panel** (gear icon, top right):
+  - Toggle **Start with Windows** — registers the app to launch with the OS, sitting in the tray.
+  - **Sign out of claude.ai** — clears the in-app session and re-prompts for login.
+  - **Check for updates** — manual trigger; otherwise checked automatically on startup.
+
+## 🔧 How it works
 
 Claude.ai has an internal endpoint that powers its own sidebar quota widget:
 
@@ -12,73 +34,72 @@ Claude.ai has an internal endpoint that powers its own sidebar quota widget:
 GET https://claude.ai/api/organizations/<org_id>/usage
 ```
 
-Only a logged-in browser tab on `claude.ai` can call it (same-origin + session cookie). An external static site can't reach it due to CORS. So this project uses a **console snippet bridge**:
+Only a logged-in browser tab on `claude.ai` can call it (same-origin + session cookie). The desktop app embeds a **hidden WebView2 window** pointed at claude.ai (this is also where you sign in once). A Rust loop in the app:
 
-1. You paste a short snippet into the DevTools Console on `claude.ai`.
-2. On first run the snippet `window.open`s this page with the usage JSON base64-encoded in the URL hash.
-3. The snippet then runs every 60 seconds, pushing fresh data to this page via `postMessage` — no new tab, no focus theft.
-4. This page decodes each update, re-renders the widget, and caches the latest snapshot in `localStorage` so you see the last known values even if the claude.ai tab closes.
-5. The channel is two-way: the **Refresh** button on this page posts a `tick` command back to the claude.ai tab, which fetches immediately instead of waiting for the next 60-second tick.
+1. Reads cookies from the embedded webview every 60 seconds (`Webview::cookies_for_url`).
+2. Extracts the `lastActiveOrg` cookie value.
+3. Calls the `/usage` endpoint with `reqwest`, attaching all session cookies.
+4. Emits a Tauri event with the JSON response.
+5. The main window subscribes and re-renders the widget.
 
-No backend. No extension. No API key. Your claude.ai session cookie never leaves `claude.ai`.
+If the cookies expire or the user signs out, the app surfaces the embedded webview so you can sign in again.
 
-> **Why not a bookmarklet?** claude.ai sets a strict Content Security Policy that blocks `javascript:` bookmarks — clicking one just redirects to `about:blank#blocked`. The DevTools console sidesteps CSP because it's privileged.
+**Auto-updates** are signed Ed25519 releases from this repo's GitHub Releases. The app verifies signatures against an embedded public key before applying any binary. Private signing key never leaves the maintainer's machine.
 
-## Use
+**Stack**: Tauri 2 + Rust + WebView2 (system) + a tiny vanilla-JS frontend. Final MSI is ~5 MB; runtime memory ~50 MB.
 
-1. Open [the page](https://hanchanghun.github.io/claude-usage-web/).
-2. Click **Open claude.ai ↗** to launch a linked claude.ai tab. Tick **mini window** first if you'd like it to open as a compact popup window you can park on another virtual desktop, a second monitor, or minimized.
-3. In that new tab/window, press <kbd>F12</kbd> (or <kbd>⌘</kbd>+<kbd>⌥</kbd>+<kbd>I</kbd> on Mac) → **Console**.
-4. Back on this page, click **Copy** to copy the snippet, then paste it into the console and press <kbd>Enter</kbd>. If Chrome asks, type `allow pasting`.
-5. Your quota appears here and refreshes automatically every 60 seconds as long as the claude.ai tab/window stays open.
+## 🌐 Web fallback (no install)
 
-**Refresh now:** click the **Refresh** button in the widget header to ask the claude.ai tab for an immediate update (it stays disabled until the snippet is running).
+A static, install-free version is also hosted at <https://hanchanghun.github.io/claude-usage/>. It's a fun mini variant: paste a one-line snippet into the claude.ai DevTools console and a separate site tab renders the same widget, refreshing every 60 s while the claude.ai tab stays open.
 
-**Stop auto-refresh** at any time: run `clearInterval(__cuw.iv)` in the same console, or just close the claude.ai tab. Reloading claude.ai also stops it; re-paste to resume.
+Useful when:
+- You're on someone else's computer and can't install
+- macOS / Linux user (the desktop build is Windows-only for now)
+- Just want to peek without setup
 
-## What you see
+For everyday use, the desktop app wins on every axis (no console paste, no second tab to babysit, autostart, tray icon, auto-update).
 
-| Field | Source |
-|-------|--------|
-| Session (5h) | `five_hour.utilization` + `resets_at` |
-| Weekly | `seven_day.utilization` + `resets_at` |
-| Sonnet weekly | `seven_day_sonnet.utilization` (Max plan only) |
-| Opus weekly | `seven_day_opus.utilization` (Max plan only) |
-| Extra usage | `extra_usage.used_credits / monthly_limit` (if enabled) |
+## 🔒 Privacy
 
-Reset countdowns re-render locally every 30 s. A green dot + pulse animation marks every fresh push; the dot turns amber and the badge flips to "stale" after 10 minutes without an update.
+- Your claude.ai session cookie stays inside the embedded webview (same trust boundary as a normal browser tab on claude.ai).
+- The only network request the app makes is the same `/api/organizations/<org>/usage` call claude.ai makes for itself.
+- The auto-updater talks to GitHub Releases and downloads signed MSI binaries; nothing else.
+- No analytics, no telemetry, no third-party services.
 
-The **Refresh** button is enabled as soon as the first push arrives and goes disabled again if the claude.ai tab closes. While a manual refresh is in flight the icon spins; it clears on the next push or after a 5-second timeout if the claude.ai tab didn't respond (e.g. after a reload without re-pasting).
+## 🛠 Building from source
 
-### Mini window mode
+```bash
+git clone https://github.com/HanChangHun/claude-usage
+cd claude-usage/app
+npm install
+npm run tauri dev          # dev mode
+npm run tauri build        # release MSI in src-tauri/target/release/bundle/msi/
+```
 
-The **mini window** toggle next to the *Open claude.ai* button asks the browser to open claude.ai as a **compact popup window** (~480×360) instead of a regular tab. Chrome and Edge respect this hint reliably; from there you can drag the window to another virtual desktop (Windows: right-click the taskbar entry → *Move to desktop*; macOS: move to another Space), a second monitor, or just minimize it out of the way. Auto-refresh keeps working — Chrome throttles background/hidden windows, but 60-second intervals generally survive intact.
+Requires Rust 1.95+, Node 20+, Visual Studio Build Tools 2022 with the **Desktop development with C++** workload.
 
-## Privacy
+To produce a release that the auto-updater can verify, set the signing key env vars before `tauri build`:
 
-- The snippet runs only when *you* paste it, in the tab *you* pasted it into.
-- The only network call it makes is the same call claude.ai already makes for you — `/api/organizations/<org>/usage`, with your existing logged-in session.
-- The first response travels to this page via URL hash; subsequent ones via cross-tab `postMessage` — both stay entirely in your browser.
-- The latest snapshot is cached under `localStorage` key `claude-usage-web:v2`.
-- Clear everything anytime: DevTools → Application → Local Storage → delete the key (and close the claude.ai tab to stop the loop).
+```powershell
+$env:TAURI_SIGNING_PRIVATE_KEY = (Get-Content $HOME\.tauri\claude-usage-app.key -Raw)
+$env:TAURI_SIGNING_PRIVATE_KEY_PASSWORD = "<your password>"
+npm run tauri build
+```
 
-## Limitations
+A `.msi.sig` file is generated alongside the MSI; both go into the GitHub release with a `latest.json` manifest pointing at the MSI.
 
-- **Desktop browser only.** Mobile Safari / iOS Chrome don't have a DevTools console to paste into.
-- **The claude.ai tab must stay open** for live updates. If it reloads or closes, refresh is paused; open the tab again and re-paste to resume.
-- Anthropic could change the endpoint shape without notice. If the widget shows "No limits reported," the response likely shifted.
+## 📁 Layout
 
-## Files
+```
+claude-usage/
+├── index.html, style              # static landing page (web fallback lives here too)
+├── assets/                        # icons + screenshot
+├── app/                           # Tauri desktop app
+│   ├── src/                       # frontend (HTML/CSS/JS) — runs in WebView2
+│   └── src-tauri/                 # Rust + tauri.conf.json + capabilities
+└── LICENSE
+```
 
-- `index.html` — the whole app (styles, script, snippet generator)
-- `manifest.webmanifest` — PWA metadata (name, theme, icon references)
-- `assets/` — static images
-  - `favicon.svg` — the quota-mirror mark (source of truth; used by modern browser tabs)
-  - `favicon-{16,32,48,192,512}.png` — rasterized sizes for Windows/Chrome surfaces
-  - `favicon.ico` — multi-resolution ICO (16/32/48) for legacy and Windows shortcuts
-  - `apple-touch-icon.png` — 180×180 for iOS home-screen
-- `LICENSE` — MIT
-
-## License
+## 📝 License
 
 MIT © 2026 Han Changhun
