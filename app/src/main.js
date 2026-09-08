@@ -335,7 +335,7 @@ $('updateDismiss').addEventListener('click', () => {
 
 // ---------- init ----------
 setInterval(tickCountdowns, 30_000);
-initCodex({ renderRow, fmtUpdated });
+initCodex({ renderRow });
 
 // Initial autostart state sync (without showing the panel)
 syncAutostartToggle();

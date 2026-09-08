@@ -12,44 +12,37 @@ export function weeklyLimits(usage) {
   }] : [];
 }
 
-export function initCodex({ renderRow, fmtUpdated }) {
+export async function initCodex({ renderRow }) {
   const get = id => document.getElementById(id);
   const toggle = get('codexToggle');
-  const button = get('codexRefreshBtn');
   const status = get('codexStatus');
   const rows = get('codexRows');
   let enabled = localStorage.getItem('codex-usage-enabled') === 'true';
   let generation = 0;
   let inFlight = false;
-  let updatedAt = null;
 
   async function refresh() {
     if (!enabled || inFlight) return;
     inFlight = true;
-    button.disabled = true;
     const requestGeneration = generation;
-    status.textContent = 'Refreshing Codex…';
+    status.textContent = 'Connecting to Codex…';
+    status.classList.toggle('hidden', rows.childElementCount > 0);
     status.dataset.state = '';
     try {
       const usage = await window.__TAURI__.core.invoke('read_codex_usage');
       if (!enabled || requestGeneration !== generation) return;
       const limits = weeklyLimits(usage);
-      rows.innerHTML = limits.map(limit =>
-        `<div>${renderRow(limit.label, limit)}<p class="codex-remaining">${Math.round(100 - limit.utilization)}% remaining</p></div>`
-      ).join('');
-      updatedAt = limits.length ? Date.now() : null;
-      status.textContent = limits.length
-        ? fmtUpdated(updatedAt)
-        : 'No weekly limit reported. Use a ChatGPT subscription login in Codex CLI, then refresh.';
+      rows.innerHTML = limits.map(limit => renderRow(limit.label, limit)).join('');
+      status.classList.toggle('hidden', limits.length > 0);
+      status.textContent = 'No Codex weekly limit reported. Check your ChatGPT login in Codex CLI, then use the top refresh button.';
     } catch (error) {
       if (!enabled || requestGeneration !== generation) return;
       rows.replaceChildren();
-      updatedAt = null;
+      status.classList.remove('hidden');
       status.dataset.state = 'error';
       status.textContent = typeof error === 'string' ? error : 'Could not refresh Codex. Please retry.';
     } finally {
       inFlight = false;
-      button.disabled = false;
       if (enabled && requestGeneration !== generation) void refresh();
     }
   }
@@ -62,18 +55,12 @@ export function initCodex({ renderRow, fmtUpdated }) {
     localStorage.setItem('codex-usage-enabled', String(enabled));
     get('codexSection').classList.toggle('hidden', !enabled);
     rows.replaceChildren();
-    updatedAt = null;
     if (enabled) void refresh();
   });
-  button.addEventListener('click', refresh);
-  get('refreshBtn').addEventListener('click', refresh);
   get('settingsBtn').addEventListener('click', () => {
     const panel = get('settingsPanel');
     if (!panel.classList.contains('hidden')) panel.scrollIntoView({ block: 'nearest' });
   });
-  setInterval(refresh, 60_000);
-  setInterval(() => {
-    if (enabled && updatedAt && !inFlight) status.textContent = fmtUpdated(updatedAt);
-  }, 30_000);
+  await window.__TAURI__.event.listen('codex-refresh', refresh);
   void refresh();
 }

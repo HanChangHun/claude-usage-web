@@ -4,10 +4,10 @@ Preserve the existing compact Windows widget and vanilla JavaScript components.
 The source of truth is `app/src/style.css`: warm dark backgrounds, Inter body
 text, Fraunces branding, orange usage bars, amber warning and red critical states.
 Reuse `row`, `row-head`, `label`, `pct`, `reset`, `bar`, `fill`, `toggle`, and
-`settings-btn`. Percentages represent used quota; remaining quota is explicit text.
+`settings-btn`. Percentages represent used quota. Do not repeat the remaining percentage.
 
 Codex is an optional section in the scrollable usage area, enabled in Settings.
-Its refresh, errors and timestamp are independent of Claude. Default is off;
+Its requests and errors are independent of Claude, triggered by the shared backend refresh signal. Default is off;
 the choice persists locally. Disabling clears displayed data and stops polling.
 Only the main Codex seven-day window is shown; omit Spark and session limits.
 Preserve the existing Claude API-driven rows: the user's current account reports
@@ -15,11 +15,11 @@ Session (5h), Weekly (all models), and Fable weekly. Do not inject legacy Opus o
 Sonnet rows. These three plus one compact Codex weekly row must fit at 440x420
 with settings closed. Codex has no redundant section heading above its row.
 Absent windows are unavailable,
-never zero. A failure clears old rows and offers retry and login instructions.
+never zero. A failure clears old rows and shows login instructions; retry uses the shared top/tray refresh.
 
 Use existing color tokens and 1rem horizontal padding. Section labels use the
 existing 0.88rem row typography, helper text 0.74rem, status text 0.78rem.
-The section uses the existing border-soft separator. Do not introduce a new theme.
+The Codex row follows the same row spacing with no separate divider, refresh button or success timestamp. Do not introduce a new theme.
 The app remains 440x420, supports 300x320 and scrolls when content exceeds space.
 Usage and settings share one scroll container beneath the fixed header. Opening
 settings scrolls them into view; no nested scrollbars or squeezed usage pane.

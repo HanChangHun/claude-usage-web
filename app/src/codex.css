@@ -1,14 +1,11 @@
 .usage-content { flex: 1; min-height: 0; overflow-y: auto; }
 .usage-content .widget { overflow: visible; }
-.codex-section { padding: 1rem; border-top: 1px solid var(--border-soft); }
-.codex-meta { display: flex; align-items: center; gap: 0.6rem; margin-top: 0.5rem; }
-.codex-meta button { margin-left: auto; flex-shrink: 0; }
+.codex-section { padding: 0 1rem 1.1rem; }
 .codex-status, .codex-help { font-size: 0.78rem; line-height: 1.5; color: var(--text-muted); }
 .codex-status { font-size: 0.74rem; overflow-wrap: anywhere; }
 .codex-status[data-state="error"] { color: var(--crit); }
 .codex-rows { display: flex; flex-direction: column; }
 .codex-help { font-size: 0.74rem; }
-.codex-remaining { font-size: 0.74rem; color: var(--text-muted); margin-top: 0.4rem; }
 .usage-content .settings { overflow: visible; }
 .usage-content:has(.codex-section:not(.hidden)) .empty { padding: 1rem 0.5rem; }
 .topbar, .bottombar { flex-shrink: 0; }

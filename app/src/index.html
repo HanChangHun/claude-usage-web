@@ -26,7 +26,7 @@
       </div>
       <div class="topbar-actions">
         <span class="updated-badge" id="updatedBadge"><span class="dot"></span><span id="updatedText">Connecting…</span></span>
-        <button class="icon-btn" id="refreshBtn" title="Refresh now" disabled>
+        <button class="icon-btn" id="refreshBtn" title="Refresh now">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10"/><path d="M20.49 15a9 9 0 0 1-14.85 3.36L1 14"/></svg>
         </button>
         <button class="icon-btn" id="settingsBtn" title="Settings">
@@ -56,10 +56,7 @@
 
     <section class="codex-section hidden" id="codexSection" aria-label="Codex usage">
       <div class="codex-rows" id="codexRows"></div>
-      <div class="codex-meta">
-        <p class="codex-status" id="codexStatus" role="status" aria-live="polite"></p>
-        <button class="settings-btn" id="codexRefreshBtn" type="button">Refresh</button>
-      </div>
+      <p class="codex-status hidden" id="codexStatus" role="status" aria-live="polite"></p>
     </section>
 
     <div class="signin-bar hidden" id="signinBar">

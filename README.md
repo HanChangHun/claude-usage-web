@@ -128,9 +128,9 @@ MIT © 2026 Han Changhun
 ## Optional Codex weekly usage
 
 Enable **Settings → Show Codex usage** to add Codex subscription limits to the
-widget. It shows the main Codex weekly limit, used and remaining percentages,
-a reset countdown, and an independent refresh status. Spark and session limits are omitted. The option is saved locally;
-turning it off stops polling. Both providers refresh every 60 seconds when enabled.
+widget. It shows the main Codex weekly limit, the used percentage and
+a reset countdown in the same style as Claude. Spark and session limits are omitted. The option is saved locally;
+turning it off stops polling. Both providers follow the shared 60-second background refresh when enabled. The top refresh button and tray Refresh now refresh both; no separate Codex button is needed.
 
 Install [Codex CLI](https://developers.openai.com/codex/cli) and run `codex login`
 with your ChatGPT account once. An existing CLI login is reused; the widget needs

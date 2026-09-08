@@ -473,6 +473,7 @@ fn reject_org_id(app: &AppHandle, org_id: &str) {
 
 /// `from_poll` marks the 60s background loop (vs. a user-initiated refresh).
 async fn fetch_usage(app: &AppHandle, from_poll: bool) {
+    let _ = app.emit_to("main", "codex-refresh", ());
     let claude = match app.get_webview_window("claude") {
         Some(w) => w,
         None => return,
