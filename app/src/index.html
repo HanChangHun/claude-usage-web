@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Claude Usage</title>
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="codex.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -41,6 +42,7 @@
       </div>
     </header>
 
+    <div class="usage-content">
     <section class="widget" id="widget">
       <div class="empty" id="emptyState">
         <svg class="star" viewBox="-12 -12 24 24" fill="currentColor" aria-hidden="true">
@@ -52,12 +54,28 @@
       </div>
     </section>
 
+    <section class="codex-section hidden" id="codexSection" aria-label="Codex usage">
+      <div class="codex-rows" id="codexRows"></div>
+      <div class="codex-meta">
+        <p class="codex-status" id="codexStatus" role="status" aria-live="polite"></p>
+        <button class="settings-btn" id="codexRefreshBtn" type="button">Refresh</button>
+      </div>
+    </section>
+
     <div class="signin-bar hidden" id="signinBar">
       <span>Signed out of claude.ai</span>
       <button class="settings-btn primary" id="signinBarBtn" type="button">Sign in</button>
     </div>
 
     <section class="settings hidden" id="settingsPanel">
+      <div class="settings-row">
+        <label class="toggle">
+          <input type="checkbox" id="codexToggle">
+          <span class="toggle-slider"></span>
+          <span class="toggle-label">Show Codex usage</span>
+        </label>
+      </div>
+      <p class="codex-help">Uses your Codex CLI ChatGPT login. No separate widget sign-in.</p>
       <div class="settings-row">
         <label class="toggle">
           <input type="checkbox" id="autostartToggle">
@@ -79,6 +97,7 @@
       </div>
     </section>
 
+    </div>
     <footer class="bottombar">
       <span class="hint" id="hint">Auto-refresh every 60 seconds</span>
     </footer>

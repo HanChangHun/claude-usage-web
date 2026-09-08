@@ -1,6 +1,8 @@
 // Tauri 2 frontend entry — listens for usage/status events from Rust
 // and renders the widget. Uses globals exposed by `withGlobalTauri: true`.
 
+import { initCodex } from './codex.js';
+
 const { event, core } = window.__TAURI__;
 // Plugin imports (loaded dynamically; available because withGlobalTauri exposes them)
 const updaterApi = window.__TAURI__.updater;
@@ -333,6 +335,7 @@ $('updateDismiss').addEventListener('click', () => {
 
 // ---------- init ----------
 setInterval(tickCountdowns, 30_000);
+initCodex({ renderRow, fmtUpdated });
 
 // Initial autostart state sync (without showing the panel)
 syncAutostartToggle();

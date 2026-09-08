@@ -124,3 +124,20 @@ cd app
 ## 📝 라이선스
 
 MIT © 2026 Han Changhun
+
+## Codex 주간 한도 추가 기능
+
+**설정 → Show Codex usage**를 켜면 Codex 주간 사용률, 남은 비율, 초기화까지
+남은 시간이 나타납니다. 설정은 저장되며, 기능을 끄면 Codex 조회가 멈춥니다.
+Claude와 Codex는 각자 연결 상태를 표시하며 60초마다 갱신합니다.
+
+Codex CLI를 설치하고 `codex login`으로 ChatGPT 계정에 로그인해 주세요.
+기존 CLI 로그인은 그대로 사용하므로 위젯에서 웹사이트에 다시 로그인하거나
+API 키를 입력할 필요가 없습니다. API 키 로그인만으로는 구독 한도를 조회할
+수 없습니다. Desktop 로그인은 CLI에서 해당 인증을 사용할 수 있을 때 재사용합니다.
+로그인이 만료되면 CLI에서 다시 로그인한 뒤 Codex의 Refresh를 눌러 주세요.
+
+공식 `codex app-server`의 `account/rateLimits/read`를 사용합니다. 모델 작업이나
+대화 기록 조회 없이 한도만 읽으며, 무료 한도 초기화 크레딧을 사용하지 않습니다.
+표준 npm 설치 경로와 PATH에서 실행 파일을 찾습니다. 별도 설치 경로를 쓰시면
+`CODEX_USAGE_CLI` 환경 변수에 네이티브 `codex.exe` 경로를 지정해 주세요.

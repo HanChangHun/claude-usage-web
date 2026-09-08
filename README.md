@@ -124,3 +124,24 @@ cd app
 ## 📝 License
 
 MIT © 2026 Han Changhun
+
+## Optional Codex weekly usage
+
+Enable **Settings → Show Codex usage** to add Codex subscription limits to the
+widget. It shows the main Codex weekly limit, used and remaining percentages,
+a reset countdown, and an independent refresh status. Spark and session limits are omitted. The option is saved locally;
+turning it off stops polling. Both providers refresh every 60 seconds when enabled.
+
+Install [Codex CLI](https://developers.openai.com/codex/cli) and run `codex login`
+with your ChatGPT account once. An existing CLI login is reused; the widget needs
+no additional browser login, cookies or API key. API-key-only authentication does
+not provide subscription quotas. If authentication expires, sign in again through
+Codex CLI and click Refresh. A Desktop login is reused only if the CLI can access it.
+
+The backend invokes the official `codex app-server` `account/rateLimits/read`
+method with a 25-second timeout, then terminates the helper. It does not start a
+model turn or read conversation history. Credentials remain managed by Codex;
+only quota windows and bucket labels reach the widget. No reset credits are used.
+Windows native CLI and standard npm installations are discovered automatically;
+for a custom install, set `CODEX_USAGE_CLI` to the native `codex.exe` path before
+launching the widget. Missing weekly windows are shown as unavailable, not 0%.

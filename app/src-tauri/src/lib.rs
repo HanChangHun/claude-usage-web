@@ -1,3 +1,5 @@
+mod codex;
+
 use serde::Serialize;
 use std::sync::atomic::{AtomicI64, AtomicU32, Ordering};
 use std::sync::{Mutex, OnceLock};
@@ -218,6 +220,7 @@ pub fn run() {
             }
         })
         .invoke_handler(tauri::generate_handler![
+            codex::read_codex_usage,
             manual_refresh,
             open_login,
             sign_out_cmd,
